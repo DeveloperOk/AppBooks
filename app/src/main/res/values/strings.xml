@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AppBooks</string>
+    <string name="splash_screen_message">Find Book?</string>
 </resources>

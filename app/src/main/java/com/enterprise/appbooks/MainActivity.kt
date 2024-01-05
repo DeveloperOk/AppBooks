@@ -26,11 +26,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        thread {
-
-            mainViewModel.getBooks(this)
-
-        }
 
         setContent {
             AppBooksTheme {
@@ -40,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()) {
                     Column(verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        BooksNavigation()
+                        BooksNavigation(mainViewModel)
 
                     }
 

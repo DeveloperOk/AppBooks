@@ -11,3 +11,4 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val AppPrimaryColor = Color(0xFF23E2A2)
+val MainScreenImageColor =  Color(0xFF23DCE2)

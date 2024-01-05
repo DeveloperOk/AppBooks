@@ -1,5 +1,16 @@
 <resources>
+
     <string name="app_name">AppBooks</string>
     <string name="splash_screen_message">Find Book?</string>
     <string name="main_activity_books_downloaded_message">Books Downloaded!</string>
+
+    <string name="main_screen_download_books_button">DOWNLOAD BOOKS</string>
+    <string name="main_screen_list_books_button">LIST BOOKS</string>
+
+    <string name="main_screen_title">AppBooks</string>
+
+    <string name="retrofit_error_message">Error!</string>
+
+    <string name="internet_is_not_available">Internet is not available!</string>
+
 </resources>

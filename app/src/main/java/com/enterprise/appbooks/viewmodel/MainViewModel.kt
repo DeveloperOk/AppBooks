@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.enterprise.appbooks.R
@@ -28,6 +29,12 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val appRepository: AppRepository)
     : ViewModel(){
+
+    private val TAG = "MainViewModel"
+    private val failureText = "Failure: "
+    private val onFailureText = "onFailure: "
+
+    var mainScreenShowProgressIndicator = mutableStateOf(false)
 
     fun getBooks(context: Context) {
 
@@ -93,21 +100,20 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
                                     mutex.withLock {
                                         index++
-                                    }
 
-                                    if (index == sizeOfbooks) {
-                                        viewModelScope.launch(Dispatchers.Main) {
-                                            Toast.makeText(
-                                                context,
-                                                R.string.main_activity_books_downloaded_message,
-                                                Toast.LENGTH_LONG
-                                            ).show()
+                                        if (index == sizeOfbooks) {
+                                            viewModelScope.launch(Dispatchers.Main) {
+                                                Toast.makeText(
+                                                    context,
+                                                    R.string.main_activity_books_downloaded_message,
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                mainScreenShowProgressIndicator.value = false
+                                            }
                                         }
+
                                     }
-
-
                             }
-
                             }
                         }
 
@@ -116,15 +122,34 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
                 }else{
 
-                    Log.d("MainViewModel", "Failure: "+ response.message().toString())
+                    Log.d(TAG, failureText + response.message().toString())
+                    viewModelScope.launch(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            R.string.retrofit_error_message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        mainScreenShowProgressIndicator.value = false
+
+                    }
 
                 }
 
             }
 
             override fun onFailure(call: Call<BooksData?>, t: Throwable) {
-                Log.d("MainViewModel", "onFailure: "+ t.message)
+
+                Log.d(TAG, onFailureText + t.message)
+                viewModelScope.launch(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        R.string.retrofit_error_message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                    mainScreenShowProgressIndicator.value = false
+                }
             }
+
         })
 
     }

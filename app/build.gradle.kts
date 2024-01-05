@@ -68,6 +68,9 @@ kapt {
 
 dependencies {
 
+    //Compose Constraint Layout
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
     //Picasso
     implementation("com.squareup.picasso:picasso:2.8")
 

@@ -89,9 +89,11 @@ fun BodyContent(
             )
 
             Button(
+                enabled = mainViewModel.isMainScreenButtonsEnabled.value,
                 onClick = {
 
                     if(InternetManager.isInternetAvailable(context)){
+                        mainViewModel.isMainScreenButtonsEnabled.value = false
                         mainViewModel.mainScreenShowProgressIndicator.value = true
                         mainViewModel.getBooks(context)
                     }else {
@@ -105,6 +107,7 @@ fun BodyContent(
             }
 
             Button(
+                enabled = mainViewModel.isMainScreenButtonsEnabled.value,
                 onClick = { navController.navigate(BooksScreens.BookListScreen.name) },
                 colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
             ) {

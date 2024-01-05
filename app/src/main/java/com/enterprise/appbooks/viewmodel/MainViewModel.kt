@@ -35,6 +35,7 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
     private val onFailureText = "onFailure: "
 
     var mainScreenShowProgressIndicator = mutableStateOf(false)
+    var isMainScreenButtonsEnabled = mutableStateOf(true)
 
     fun getBooks(context: Context) {
 
@@ -109,6 +110,7 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                                                     Toast.LENGTH_LONG
                                                 ).show()
                                                 mainScreenShowProgressIndicator.value = false
+                                                isMainScreenButtonsEnabled.value = true
                                             }
                                         }
 
@@ -130,6 +132,7 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                             Toast.LENGTH_LONG
                         ).show()
                         mainScreenShowProgressIndicator.value = false
+                        isMainScreenButtonsEnabled.value = true
 
                     }
 
@@ -147,6 +150,7 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                         Toast.LENGTH_LONG
                     ).show()
                     mainScreenShowProgressIndicator.value = false
+                    isMainScreenButtonsEnabled.value = true
                 }
             }
 

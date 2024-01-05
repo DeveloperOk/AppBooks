@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AppBooks</string>
     <string name="splash_screen_message">Find Book?</string>
+    <string name="main_activity_books_downloaded_message">Books Downloaded!</string>
 </resources>

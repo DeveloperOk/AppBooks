@@ -68,7 +68,16 @@ kapt {
 
 dependencies {
 
-    //navigation
+    //Gson
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //Room components
+    val room_version = "2.4.2"
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
+
+    //Navigation
     implementation("androidx.navigation:navigation-compose:2.4.0-beta02")
 
     //Hilt

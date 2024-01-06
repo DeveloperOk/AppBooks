@@ -27,7 +27,7 @@ fun BooksNavigation(mainViewModel: MainViewModel) {
         }
 
         composable(BooksScreens.BookListScreen.name){
-            BookListScreen(navController = navController)
+            BookListScreen(navController = navController, mainViewModel = mainViewModel)
         }
 
         composable(BooksScreens.BookDetailScreen.name){

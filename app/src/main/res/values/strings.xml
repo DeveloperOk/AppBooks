@@ -13,4 +13,6 @@
 
     <string name="internet_is_not_available">Internet is not available!</string>
 
+    <string name="no_data_to_display">No data to display!</string>
+
 </resources>

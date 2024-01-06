@@ -37,4 +37,23 @@ class AppRepository @Inject constructor(private val localDataSourceBookDatabase:
         localDataSourceBookDatabase.getFavoriteBookLabelDao().insertFavoriteBookLabel(favoriteBookLabel)
     }
 
+    fun getAllAppBooks(): List<AppBook> {
+        return localDataSourceBookDatabase.getBookDao().getAllAppBooks()
+    }
+
+    fun getFavoriteBookLabel(primaryIsbn13: String): FavoriteBookLabel? {
+        return localDataSourceBookDatabase.getFavoriteBookLabelDao()
+            .getFavoriteBookLabel(primaryIsbn13)
+    }
+
+    fun getSmallImage(primaryIsbn13: String): SmallImage?{
+
+        return localDataSourceBookDatabase.getSmallImageDao().getSmallImage(primaryIsbn13)
+
+    }
+
+
+
+
+
 }

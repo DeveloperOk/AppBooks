@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,6 +37,8 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
     var mainScreenShowProgressIndicator = mutableStateOf(false)
     var isMainScreenButtonsEnabled = mutableStateOf(true)
+
+    var mutableStateAllAppBooks = mutableStateListOf<AppBook>()
 
     fun getBooks(context: Context) {
 
@@ -158,6 +161,38 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
     }
 
+    fun getAllAppBooks() {
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val listOfAppBooks = appRepository.getAllAppBooks()
+
+            for (appBook in listOfAppBooks){
+
+            }
+
+            viewModelScope.launch(Dispatchers.IO) {
+
+                var tempMutableStateAllAppBooks = mutableStateListOf<AppBook>()
+                tempMutableStateAllAppBooks.addAll(listOfAppBooks)
+
+                mutableStateAllAppBooks = tempMutableStateAllAppBooks
+
+            }
+
+        }
+
+    }
+
+    fun getFavoriteBookLabel(primaryIsbn13: String): FavoriteBookLabel? {
+        return appRepository.getFavoriteBookLabel(primaryIsbn13)
+    }
+
+    fun getSmallImage(primaryIsbn13: String): SmallImage?{
+
+        return appRepository.getSmallImage(primaryIsbn13)
+
+    }
 
 
 }

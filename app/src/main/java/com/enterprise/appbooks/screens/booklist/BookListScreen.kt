@@ -107,6 +107,7 @@ fun LazyColumnRow(navController: NavController, appBook: AppBook, mainViewModel:
             .width(350.dp)
             .height(240.dp)
             .clickable {
+                mainViewModel.selectedAppBook = appBook
                 navController.navigate(BooksScreens.BookDetailScreen.name)
             },
         shape = RoundedCornerShape(15.dp),

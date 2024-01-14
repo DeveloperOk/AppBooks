@@ -1,6 +1,7 @@
 package com.enterprise.appbooks.screens.main
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +33,11 @@ import com.enterprise.appbooks.viewmodel.MainViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController, mainViewModel: MainViewModel){
+fun MainScreen(navController: NavController, mainViewModel: MainViewModel, activityFinisher : () -> Unit){
+
+    BackHandler{
+        activityFinisher()
+    }
 
     BodyContent(navController, mainViewModel)
 

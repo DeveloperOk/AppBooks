@@ -11,7 +11,7 @@ import com.enterprise.appbooks.screens.splash.SplashScreen
 import com.enterprise.appbooks.viewmodel.MainViewModel
 
 @Composable
-fun BooksNavigation(mainViewModel: MainViewModel) {
+fun BooksNavigation(mainViewModel: MainViewModel, activityFinisher: () -> Unit) {
 
     val navController = rememberNavController()
 
@@ -23,7 +23,7 @@ fun BooksNavigation(mainViewModel: MainViewModel) {
         }
 
         composable(BooksScreens.MainScreen.name){
-            MainScreen(navController = navController, mainViewModel = mainViewModel)
+            MainScreen(navController = navController, mainViewModel = mainViewModel, activityFinisher = activityFinisher)
         }
 
         composable(BooksScreens.BookListScreen.name){
@@ -31,7 +31,7 @@ fun BooksNavigation(mainViewModel: MainViewModel) {
         }
 
         composable(BooksScreens.BookDetailScreen.name){
-            BookDetailScreen(navController = navController)
+            BookDetailScreen(navController = navController, mainViewModel = mainViewModel)
         }
 
     }

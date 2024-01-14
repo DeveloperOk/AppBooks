@@ -27,6 +27,10 @@ class MainActivity : ComponentActivity() {
 
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
+        val activityFinisher : () -> Unit = {
+            this.finish()
+        }
+
         setContent {
             AppBooksTheme {
                 // A surface container using the 'background' color from the theme
@@ -35,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()) {
                     Column(verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        BooksNavigation(mainViewModel)
+                        BooksNavigation(mainViewModel, activityFinisher)
 
                     }
 

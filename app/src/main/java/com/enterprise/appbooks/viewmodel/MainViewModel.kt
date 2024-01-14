@@ -40,6 +40,8 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
     var mutableStateAllAppBooks = mutableStateListOf<AppBook>()
 
+    var selectedAppBook: AppBook? = null
+
     fun getBooks(context: Context) {
 
         val mutex = Mutex()
@@ -194,5 +196,16 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
     }
 
+    fun getBigImage(primaryIsbn13: String): BigImage?{
+
+        return appRepository.getBigImage(primaryIsbn13)
+
+    }
+
+    fun addFavoriteBookLabel(favoriteBookLabel: FavoriteBookLabel){
+
+        appRepository.addFavoriteBookLabel(favoriteBookLabel)
+
+    }
 
 }

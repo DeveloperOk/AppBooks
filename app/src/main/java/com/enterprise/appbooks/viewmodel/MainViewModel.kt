@@ -169,11 +169,7 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
             val listOfAppBooks = appRepository.getAllAppBooks()
 
-            for (appBook in listOfAppBooks){
-
-            }
-
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.Main) {
 
                 var tempMutableStateAllAppBooks = mutableStateListOf<AppBook>()
                 tempMutableStateAllAppBooks.addAll(listOfAppBooks)

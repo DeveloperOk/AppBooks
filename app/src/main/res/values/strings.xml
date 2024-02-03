@@ -22,5 +22,8 @@
     <string name="book_detail_screen_app_book_description">"Description: "</string>
 
 
+    <string name="main_screen_percent_sign">%</string>
+
+
 
 </resources>

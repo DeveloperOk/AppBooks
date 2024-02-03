@@ -12,7 +12,7 @@ interface BookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addAppBook(appBook: AppBook)
 
-    @Query("SELECT * FROM book_table" )
+    @Query("SELECT * FROM book_table ORDER BY rank ASC" )
     fun getAllAppBooks(): List<AppBook>
 
     @Query("SELECT * FROM book_table WHERE primaryIsbn13 =:primaryIsbn13" )

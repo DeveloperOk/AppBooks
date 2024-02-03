@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,7 @@ import com.enterprise.appbooks.repository.AppRepository
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -36,6 +38,9 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
     private val onFailureText = "onFailure: "
 
     var mainScreenShowProgressIndicator = mutableStateOf(false)
+    var mainScreenProgressBarFactor: MutableState<Float> = mutableStateOf(0.0f)
+    var mainScreenProgressBarPercent: MutableState<Int> = mutableStateOf(0)
+
     var isMainScreenButtonsEnabled = mutableStateOf(true)
 
     var mutableStateAllAppBooks = mutableStateListOf<AppBook>()
@@ -60,6 +65,8 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
                         val sizeOfbooks = books.size
                         var index = 0
+
+                        viewModelScope.launch(Dispatchers.IO) {
                         for (book in books){
 
                             if(book.primaryIsbn13 != null) {
@@ -83,16 +90,7 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                                 appBook.description = book.description
                                 appBook.publisher = book.publisher
 
-                                viewModelScope.launch(Dispatchers.IO) {
-
-                                    appRepository.addAppBook(appBook)
-
-                                    val bitmapSmall: Bitmap =
-                                        Picasso.get().load(appBook.bookImage).resize(
-                                            ImageConstants.SmallImageWidth, 0
-                                        ).get()
-                                    smallImage.smallImage = bitmapSmall
-                                    appRepository.addSmallImage(smallImage)
+                                appRepository.addAppBook(appBook)
 
                                     val bitmapBig: Bitmap =
                                         Picasso.get().load(appBook.bookImage).resize(
@@ -101,14 +99,29 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                                     bigImage.bigImage = bitmapBig
                                     appRepository.addBigImage(bigImage)
 
+                                    val bitmapSmall: Bitmap
+                                    = Bitmap.createScaledBitmap(bitmapBig,ImageConstants.SmallImageWidth,
+                                        bitmapBig.height*ImageConstants.SmallImageWidth/bitmapBig.width, false)
+                                    smallImage.smallImage = bitmapSmall
+                                    appRepository.addSmallImage(smallImage)
+
                                     favoriteBookLabel.favorite = false
                                     appRepository.insertFavoriteBookLabel(favoriteBookLabel)
 
                                     mutex.withLock {
                                         index++
+                                        viewModelScope.launch(Dispatchers.Main) {
+                                            Log.d(TAG, "Factor: "+mainScreenProgressBarFactor.value.toString())
+                                            mainScreenProgressBarFactor.value = index.toFloat() / sizeOfbooks.toFloat()
+                                            mainScreenProgressBarPercent.value =  (mainScreenProgressBarFactor.value * 100).toInt()
 
+                                        }
                                         if (index == sizeOfbooks) {
                                             viewModelScope.launch(Dispatchers.Main) {
+
+                                                mainScreenProgressBarFactor.value = 1.0f
+                                                mainScreenProgressBarPercent.value =  100
+
                                                 Toast.makeText(
                                                     context,
                                                     R.string.main_activity_books_downloaded_message,

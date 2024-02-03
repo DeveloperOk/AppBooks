@@ -172,22 +172,25 @@ fun BodyContent(
                         .background(Color.White),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(
-                        contentPadding = PaddingValues(1.dp),
-                        onClick = { },
-                        modifier = Modifier
-                            .fillMaxWidth(mainViewModel.mainScreenProgressBarFactor.value)
-                            .background(
-                                brush = Brush.linearGradient(
-                                    listOf(
-                                        ProgressBarStartColor, ProgressBarEndColor
-                                    )
-                                )
-                            ),
-                        enabled = false,
-                        elevation = null,
-                    ) {     }
 
+                    val isButtonVisible = !mainViewModel.mainScreenProgressBarFactor.value.equals(0.0f)
+                    if(isButtonVisible) {
+                        Button(
+                            contentPadding = PaddingValues(1.dp),
+                            onClick = { },
+                            modifier = Modifier
+                                .fillMaxWidth(mainViewModel.mainScreenProgressBarFactor.value)
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        listOf(
+                                            ProgressBarStartColor, ProgressBarEndColor
+                                        )
+                                    )
+                                ),
+                            enabled = false,
+                            elevation = null,
+                        ) { }
+                    }
 
                 }
 

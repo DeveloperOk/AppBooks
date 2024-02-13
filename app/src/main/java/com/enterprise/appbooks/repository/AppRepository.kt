@@ -16,7 +16,7 @@ class AppRepository @Inject constructor(private val localDataSourceBookDatabase:
                                         private val remoteDataSourceNytimesApi: NytimesApi ) {
 
 
-    fun getBooks(): Call<BooksData> {
+    suspend fun getBooks(): BooksData? {
         return remoteDataSourceNytimesApi.getBooks(NytimesApiConstants.Date, NytimesApiConstants.List, NytimesApiConstants.ApiKey)
     }
 

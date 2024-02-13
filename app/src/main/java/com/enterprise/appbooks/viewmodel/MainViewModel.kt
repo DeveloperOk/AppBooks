@@ -13,6 +13,7 @@ import com.enterprise.appbooks.R
 import com.enterprise.appbooks.constants.nytimes.ImageConstants
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.BigImage
+import com.enterprise.appbooks.model.Book
 import com.enterprise.appbooks.model.BooksData
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.SmallImage
@@ -49,131 +50,136 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
     fun getBooks(context: Context) {
 
-        val mutex = Mutex()
+        viewModelScope.launch(Dispatchers.IO) {
 
-        val callBooksData = appRepository.getBooks()
+            try {
 
-        callBooksData.enqueue(object : Callback<BooksData?> {
-            override fun onResponse(call: Call<BooksData?>, response: Response<BooksData?>) {
+                val booksData = appRepository.getBooks()
 
-                if(response.isSuccessful){
+                val books = booksData?.results?.books
+                addBooksToDatabase(books, context)
 
-                    val responseBody = response?.body()
-                    val books = responseBody?.results?.books
+            }catch (exception: Exception){
 
-                    if(books != null){
+                handleError(exception, context)
 
-                        val sizeOfbooks = books.size
-                        var index = 0
+            }
 
-                        viewModelScope.launch(Dispatchers.IO) {
-                        for (book in books){
+        }
 
-                            if(book.primaryIsbn13 != null) {
+    }
 
-                                var appBook = AppBook()
-                                var smallImage = SmallImage()
-                                var bigImage = BigImage()
-                                var favoriteBookLabel = FavoriteBookLabel()
+    private fun handleError(exception: Exception, context: Context) {
 
-                                appBook.primaryIsbn13 = book.primaryIsbn13!!
-                                smallImage.primaryIsbn13 = book.primaryIsbn13!!
-                                bigImage.primaryIsbn13 = book.primaryIsbn13!!
-                                favoriteBookLabel.primaryIsbn13 = book.primaryIsbn13!!
+        Log.d(TAG, onFailureText + exception.message)
 
-                                appBook.bookImage = book.bookImage
-                                appBook.bookImageWidth = book.bookImageWidth
-                                appBook.bookImageHeight = book.bookImageHeight
-                                appBook.title = book.title
-                                appBook.author = book.author
-                                appBook.rank = book.rank
-                                appBook.description = book.description
-                                appBook.publisher = book.publisher
+        viewModelScope.launch(Dispatchers.Main) {
 
-                                appRepository.addAppBook(appBook)
+            Toast.makeText(
+                context,
+                R.string.retrofit_error_message,
+                Toast.LENGTH_LONG
+            ).show()
 
-                                    val bitmapBig: Bitmap =
-                                        Picasso.get().load(appBook.bookImage).resize(
-                                            ImageConstants.BigImageWidth, 0
-                                        ).get()
-                                    bigImage.bigImage = bitmapBig
-                                    appRepository.addBigImage(bigImage)
+            mainScreenShowProgressIndicator.value = false
+            isMainScreenButtonsEnabled.value = true
 
-                                    val bitmapSmall: Bitmap
-                                    = Bitmap.createScaledBitmap(bitmapBig,ImageConstants.SmallImageWidth,
-                                        bitmapBig.height*ImageConstants.SmallImageWidth/bitmapBig.width, false)
-                                    smallImage.smallImage = bitmapSmall
-                                    appRepository.addSmallImage(smallImage)
+        }
 
-                                    favoriteBookLabel.favorite = false
-                                    appRepository.insertFavoriteBookLabel(favoriteBookLabel)
+    }
 
-                                    mutex.withLock {
-                                        index++
-                                        viewModelScope.launch(Dispatchers.Main) {
-                                            Log.d(TAG, "Factor: "+mainScreenProgressBarFactor.value.toString())
-                                            mainScreenProgressBarFactor.value = index.toFloat() / sizeOfbooks.toFloat()
-                                            mainScreenProgressBarPercent.value =  (mainScreenProgressBarFactor.value * 100).toInt()
+    private fun addBooksToDatabase(
+        books: ArrayList<Book>?,
+        context: Context
+    ) {
+        if (books != null) {
 
-                                        }
-                                        if (index == sizeOfbooks) {
-                                            viewModelScope.launch(Dispatchers.Main) {
+            val mutex = Mutex()
 
-                                                mainScreenProgressBarFactor.value = 1.0f
-                                                mainScreenProgressBarPercent.value =  100
+            val sizeOfbooks = books.size
+            var index = 0
 
-                                                Toast.makeText(
-                                                    context,
-                                                    R.string.main_activity_books_downloaded_message,
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                                mainScreenShowProgressIndicator.value = false
-                                                isMainScreenButtonsEnabled.value = true
-                                            }
-                                        }
+            viewModelScope.launch(Dispatchers.IO) {
+                for (book in books) {
 
-                                    }
+                    if (book.primaryIsbn13 != null) {
+
+                        var appBook = AppBook()
+                        var smallImage = SmallImage()
+                        var bigImage = BigImage()
+                        var favoriteBookLabel = FavoriteBookLabel()
+
+                        appBook.primaryIsbn13 = book.primaryIsbn13!!
+                        smallImage.primaryIsbn13 = book.primaryIsbn13!!
+                        bigImage.primaryIsbn13 = book.primaryIsbn13!!
+                        favoriteBookLabel.primaryIsbn13 = book.primaryIsbn13!!
+
+                        appBook.bookImage = book.bookImage
+                        appBook.bookImageWidth = book.bookImageWidth
+                        appBook.bookImageHeight = book.bookImageHeight
+                        appBook.title = book.title
+                        appBook.author = book.author
+                        appBook.rank = book.rank
+                        appBook.description = book.description
+                        appBook.publisher = book.publisher
+
+                        appRepository.addAppBook(appBook)
+
+                        val bitmapBig: Bitmap =
+                            Picasso.get().load(appBook.bookImage).resize(
+                                ImageConstants.BigImageWidth, 0
+                            ).get()
+                        bigImage.bigImage = bitmapBig
+                        appRepository.addBigImage(bigImage)
+
+                        val bitmapSmall: Bitmap = Bitmap.createScaledBitmap(
+                            bitmapBig,
+                            ImageConstants.SmallImageWidth,
+                            bitmapBig.height * ImageConstants.SmallImageWidth / bitmapBig.width,
+                            false
+                        )
+                        smallImage.smallImage = bitmapSmall
+                        appRepository.addSmallImage(smallImage)
+
+                        favoriteBookLabel.favorite = false
+                        appRepository.insertFavoriteBookLabel(favoriteBookLabel)
+
+                        mutex.withLock {
+                            index++
+                            viewModelScope.launch(Dispatchers.Main) {
+                                Log.d(
+                                    TAG,
+                                    "Factor: " + mainScreenProgressBarFactor.value.toString()
+                                )
+                                mainScreenProgressBarFactor.value =
+                                    index.toFloat() / sizeOfbooks.toFloat()
+                                mainScreenProgressBarPercent.value =
+                                    (mainScreenProgressBarFactor.value * 100).toInt()
+
                             }
+                            if (index == sizeOfbooks) {
+                                viewModelScope.launch(Dispatchers.Main) {
+
+                                    mainScreenProgressBarFactor.value = 1.0f
+                                    mainScreenProgressBarPercent.value = 100
+
+                                    Toast.makeText(
+                                        context,
+                                        R.string.main_activity_books_downloaded_message,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    mainScreenShowProgressIndicator.value = false
+                                    isMainScreenButtonsEnabled.value = true
+                                }
                             }
+
                         }
-
-
                     }
-
-                }else{
-
-                    Log.d(TAG, failureText + response.message().toString())
-                    viewModelScope.launch(Dispatchers.Main) {
-                        Toast.makeText(
-                            context,
-                            R.string.retrofit_error_message,
-                            Toast.LENGTH_LONG
-                        ).show()
-                        mainScreenShowProgressIndicator.value = false
-                        isMainScreenButtonsEnabled.value = true
-
-                    }
-
-                }
-
-            }
-
-            override fun onFailure(call: Call<BooksData?>, t: Throwable) {
-
-                Log.d(TAG, onFailureText + t.message)
-                viewModelScope.launch(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        R.string.retrofit_error_message,
-                        Toast.LENGTH_LONG
-                    ).show()
-                    mainScreenShowProgressIndicator.value = false
-                    isMainScreenButtonsEnabled.value = true
                 }
             }
 
-        })
 
+        }
     }
 
     fun getAllAppBooks() {

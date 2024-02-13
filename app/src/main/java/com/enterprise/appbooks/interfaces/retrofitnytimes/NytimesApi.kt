@@ -9,8 +9,8 @@ import retrofit2.http.Query
 interface NytimesApi {
 
     @GET("lists/{date}/{list}.json")
-    fun getBooks(@Path("date") date: String,
+    suspend fun getBooks(@Path("date") date: String,
                  @Path("list") list: String,
-                 @Query("api-key") apiKey: String): Call<BooksData>
+                 @Query("api-key") apiKey: String): BooksData?
 
 }

@@ -92,7 +92,11 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
         books: ArrayList<Book>?,
         context: Context
     ) {
-        if (books != null) {
+        if (books.isNullOrEmpty()) {
+
+            handleEndOfProcess(R.string.main_screen_no_books_message, context)
+
+        } else {
 
             val mutex = Mutex()
 
@@ -157,20 +161,11 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                                     (mainScreenProgressBarFactor.value * 100).toInt()
 
                             }
+
                             if (index == sizeOfbooks) {
-                                viewModelScope.launch(Dispatchers.Main) {
 
-                                    mainScreenProgressBarFactor.value = 1.0f
-                                    mainScreenProgressBarPercent.value = 100
+                                handleEndOfProcess(R.string.main_activity_books_downloaded_message, context)
 
-                                    Toast.makeText(
-                                        context,
-                                        R.string.main_activity_books_downloaded_message,
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    mainScreenShowProgressIndicator.value = false
-                                    isMainScreenButtonsEnabled.value = true
-                                }
                             }
 
                         }
@@ -178,6 +173,24 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
                 }
             }
 
+
+        }
+    }
+
+    private fun handleEndOfProcess(messageTextId: Int, context: Context) {
+        viewModelScope.launch(Dispatchers.Main) {
+
+            mainScreenProgressBarFactor.value = 1.0f
+            mainScreenProgressBarPercent.value = 100
+
+            Toast.makeText(
+                context,
+                messageTextId,
+                Toast.LENGTH_LONG
+            ).show()
+
+            mainScreenShowProgressIndicator.value = false
+            isMainScreenButtonsEnabled.value = true
 
         }
     }

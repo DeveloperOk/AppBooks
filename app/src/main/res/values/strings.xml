@@ -23,7 +23,6 @@
 
 
     <string name="main_screen_percent_sign">%</string>
-
-
+    <string name="main_screen_no_books_message">There is no book!</string>
 
 </resources>

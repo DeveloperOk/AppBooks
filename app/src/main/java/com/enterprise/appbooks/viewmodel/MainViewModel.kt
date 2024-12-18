@@ -54,14 +54,26 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
             try {
 
-                val booksData = appRepository.getBooks()
+                val booksDataResponse = appRepository.getBooks()
 
-                val books = booksData?.results?.books
-                addBooksToDatabase(books, context)
+                if(booksDataResponse.isSuccessful){
+
+                    val booksData = booksDataResponse.body()
+
+                    val books = booksData?.results?.books
+                    addBooksToDatabase(books, context)
+
+                }else{
+
+                    val failureMessageToLog = "Response Error!"
+                    handleError(failureMessageToLog, context)
+
+                }
 
             }catch (exception: Exception){
 
-                handleError(exception, context)
+                val failureMessageToLog = exception.message.toString()
+                handleError(failureMessageToLog, context)
 
             }
 
@@ -69,9 +81,9 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
 
     }
 
-    private fun handleError(exception: Exception, context: Context) {
+    private fun handleError(failureMessageToLog: String, context: Context) {
 
-        Log.d(TAG, onFailureText + exception.message)
+        Log.d(TAG, onFailureText + failureMessageToLog)
 
         viewModelScope.launch(Dispatchers.Main) {
 

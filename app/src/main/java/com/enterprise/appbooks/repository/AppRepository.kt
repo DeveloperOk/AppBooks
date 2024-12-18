@@ -10,13 +10,14 @@ import com.enterprise.appbooks.model.BooksData
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.SmallImage
 import retrofit2.Call
+import retrofit2.Response
 import javax.inject.Inject
 
 class AppRepository @Inject constructor(private val localDataSourceBookDatabase:BookDatabase,
                                         private val remoteDataSourceNytimesApi: NytimesApi ) {
 
 
-    suspend fun getBooks(): BooksData? {
+    suspend fun getBooks(): Response<BooksData?> {
         return remoteDataSourceNytimesApi.getBooks(NytimesApiConstants.Date, NytimesApiConstants.List, NytimesApiConstants.ApiKey)
     }
 

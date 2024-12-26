@@ -25,8 +25,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideNytimesApi(): NytimesApi {
-        return RetrofitNYTimes.getRetrofitNewYorkTimesApi()
+    fun provideNytimesApi(@ApplicationContext context: Context): NytimesApi {
+        return RetrofitNYTimes.getRetrofitNewYorkTimesApi(context)
     }
 
 

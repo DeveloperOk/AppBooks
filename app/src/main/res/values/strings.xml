@@ -25,4 +25,11 @@
     <string name="main_screen_percent_sign">%</string>
     <string name="main_screen_no_books_message">There is no book!</string>
 
+    <string name="no_internet_connection_exception_message">No Internet Connection</string>
+
+    <string name="no_internet_connection_popup_icon_content_description">Popup Icon</string>
+    <string name="no_internet_connection_popup_title">Information</string>
+    <string name="no_internet_connection_popup_message">No Internet Connection</string>
+    <string name="no_internet_connection_neutral_button_text">OK</string>
+
 </resources>

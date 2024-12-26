@@ -7,10 +7,12 @@ import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.constants.nytimes.ImageConstants
+import com.enterprise.appbooks.exception.NoInternetConnectionException
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.BigImage
 import com.enterprise.appbooks.model.Book
@@ -31,7 +33,6 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
     : ViewModel(){
 
     private val TAG = "MainViewModel"
-    private val failureText = "Failure: "
     private val onFailureText = "onFailure: "
 
     var mainScreenShowProgressIndicator = mutableStateOf(false)
@@ -40,55 +41,71 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
 
     var isMainScreenButtonsEnabled = mutableStateOf(true)
 
-    var mutableStateAllAppBooks = mutableStateListOf<AppBook>()
+    val isNoInternetConnectionDialogVisible = mutableStateOf(false)
 
     fun getBooks(context: Context) {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
 
-            try {
+            mainScreenProgressBarFactor.value = 0.0f
+            mainScreenProgressBarPercent.value = 0
+            isMainScreenButtonsEnabled.value = false
+            mainScreenShowProgressIndicator.value = true
 
-                val booksDataResponse = appRepository.getBooks()
+            viewModelScope.launch(Dispatchers.IO) {
 
-                if(booksDataResponse.isSuccessful){
+                try {
 
-                    val booksData = booksDataResponse.body()
+                    val booksDataResponse = appRepository.getBooks()
 
-                    val books = booksData?.results?.books
-                    addBooksToDatabase(books, context)
+                    if (booksDataResponse.isSuccessful) {
 
-                }else{
+                        val booksData = booksDataResponse.body()
 
-                    val failureMessageToLog = "Response Error!"
-                    handleError(failureMessageToLog, context)
+                        val books = booksData?.results?.books
+                        addBooksToDatabase(books, context)
+
+                    } else {
+
+                        val failureMessageToLog = "Response Error!"
+                        handleError(failureMessageToLog, context, false)
+
+                    }
+
+                } catch (exception: Exception) {
+
+                    val failureMessageToLog = exception.message.toString()
+
+                    if (exception is NoInternetConnectionException) {
+                        handleError(failureMessageToLog, context, true)
+                    } else {
+                        handleError(failureMessageToLog, context, false)
+                    }
 
                 }
 
-            }catch (exception: Exception){
-
-                val failureMessageToLog = exception.message.toString()
-                handleError(failureMessageToLog, context)
-
             }
-
         }
-
     }
 
-    private fun handleError(failureMessageToLog: String, context: Context) {
+    private fun handleError(failureMessageToLog: String, context: Context, showNoInternetConnectionPopup: Boolean) {
 
         Log.d(TAG, onFailureText + failureMessageToLog)
 
         viewModelScope.launch(Dispatchers.Main) {
 
-            Toast.makeText(
-                context,
-                R.string.retrofit_error_message,
-                Toast.LENGTH_LONG
-            ).show()
+            if(!showNoInternetConnectionPopup){
+                Toast.makeText(
+                    context,
+                    R.string.retrofit_error_message,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
 
             mainScreenShowProgressIndicator.value = false
             isMainScreenButtonsEnabled.value = true
+            isNoInternetConnectionDialogVisible.value = showNoInternetConnectionPopup
+
 
         }
 

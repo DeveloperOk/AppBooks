@@ -1,6 +1,7 @@
 package com.enterprise.appbooks.screens.bookdetail
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -24,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -44,7 +47,7 @@ fun BookDetailScreen(navController: NavController, mainSharedViewModel: MainShar
 ){
 
     LazyRow(modifier = Modifier
-        .fillMaxSize()){
+        .fillMaxSize().background(color = Color.White)){
 
         item{
 
@@ -308,7 +311,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
                     start.linkTo(parent.start, margin = 0.dp)
                     end.linkTo(parent.end, margin = 0.dp)
                     bottom.linkTo(parent.bottom, margin = 20.dp)
-                })
+                }, textAlign = TextAlign.Center)
 
     }
 

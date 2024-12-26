@@ -5,8 +5,11 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -53,31 +56,41 @@ fun SplashScreen(navController: NavController) {
     } )
 
 
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().background(color = Color.White)) {
 
 
-    Surface(
-        modifier = Modifier
-            .padding(15.dp)
-            .size(330.dp)
-            .scale(scale.value),
-        shape = CircleShape,
-        color = Color.White,
-        border = BorderStroke(
-            width = 2.dp, color = AppPrimaryColor
-        )
-    ) {
-        Column(modifier = Modifier.padding(1.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-            Image(painter = painterResource(id = R.drawable.baseline_menu_book_95),
-                contentDescription = "book",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(95.dp))
-            Text(text = stringResource(R.string.splash_screen_message),
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.LightGray)
+        Surface(
+            modifier = Modifier
+                .padding(15.dp)
+                .size(330.dp)
+                .scale(scale.value),
+            shape = CircleShape,
+            color = Color.White,
+            border = BorderStroke(
+                width = 2.dp, color = AppPrimaryColor
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(1.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_menu_book_95),
+                    contentDescription = "book",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(95.dp)
+                )
+                Text(
+                    text = stringResource(R.string.splash_screen_message),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color.LightGray
+                )
+            }
+
+
         }
-
-
     }
 }

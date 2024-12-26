@@ -1,7 +1,10 @@
 package com.enterprise.appbooks.remotedatasource.retrofit.nytimes
 
+import android.content.Context
 import com.enterprise.appbooks.constants.nytimes.NytimesApiConstants
 import com.enterprise.appbooks.interfaces.retrofitnytimes.NytimesApi
+import com.enterprise.appbooks.remotedatasource.retrofit.interceptor.NetworkInterceptor
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -9,15 +12,44 @@ class RetrofitNYTimes {
 
     companion object {
 
-        fun getRetrofitNewYorkTimesApi(): NytimesApi{
 
-            return Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(NytimesApiConstants.BaseUrl)
+        private fun getOkHttpClient(context: Context): OkHttpClient {
+
+            val client = OkHttpClient.Builder()
+                .addInterceptor(NetworkInterceptor(context = context))
                 .build()
-                .create(NytimesApi::class.java)
+
+            return client
 
         }
+
+
+        private fun getRetrofitNewYorkTimes(context: Context): Retrofit {
+
+            val client = getOkHttpClient(context = context)
+
+            val retrofit =
+                Retrofit.Builder()
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .baseUrl(NytimesApiConstants.BaseUrl)
+                    .client(client)
+                    .build()
+
+            return retrofit
+
+        }
+
+
+        fun getRetrofitNewYorkTimesApi(context: Context): NytimesApi{
+
+            val retrofitNewYorkTimes = getRetrofitNewYorkTimes(context = context)
+
+            val nYTimesApi = retrofitNewYorkTimes.create(NytimesApi::class.java)
+
+            return nYTimesApi
+
+        }
+
 
     }
 

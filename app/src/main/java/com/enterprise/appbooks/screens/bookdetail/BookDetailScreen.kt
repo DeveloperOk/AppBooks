@@ -4,9 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -18,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -30,18 +27,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.model.BigImage
 import com.enterprise.appbooks.model.FavoriteBookLabel
-import com.enterprise.appbooks.model.SmallImage
-import com.enterprise.appbooks.viewmodel.MainViewModel
+import com.enterprise.appbooks.viewmodel.MainSharedViewModel
+import com.enterprise.appbooks.viewmodel.bookdetail.BookDetailScreenViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailScreen(navController: NavController, mainViewModel: MainViewModel){
+fun BookDetailScreen(navController: NavController, mainSharedViewModel: MainSharedViewModel,
+                     bookDetailScreenViewModel: BookDetailScreenViewModel = hiltViewModel<BookDetailScreenViewModel>()
+){
 
     LazyRow(modifier = Modifier
         .fillMaxSize()){
@@ -53,7 +53,8 @@ fun BookDetailScreen(navController: NavController, mainViewModel: MainViewModel)
 
                 item{
 
-                    MainContent(mainViewModel = mainViewModel)
+                    MainContent(mainSharedViewModel = mainSharedViewModel,
+                        bookDetailScreenViewModel = bookDetailScreenViewModel)
 
                 }
 
@@ -66,7 +67,7 @@ fun BookDetailScreen(navController: NavController, mainViewModel: MainViewModel)
 }
 
 @Composable
-fun MainContent(mainViewModel: MainViewModel){
+fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewModel: BookDetailScreenViewModel){
 
     val bigImage = remember { mutableStateOf(BigImage()) }
     val favoriteBookLabel = remember { mutableStateOf(FavoriteBookLabel()) }
@@ -74,19 +75,19 @@ fun MainContent(mainViewModel: MainViewModel){
 
     LaunchedEffect(key1 = true, block = {
 
-        mainViewModel.viewModelScope.launch(Dispatchers.IO) {
+        bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
-            val tempBigImage = mainViewModel.selectedAppBook?.primaryIsbn13?.let {
-                mainViewModel.getBigImage(
+            val tempBigImage = mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
+                bookDetailScreenViewModel.getBigImage(
                     it
                 )
             }
-            val tempFavoriteBookLabel = mainViewModel.selectedAppBook?.primaryIsbn13?.let {
-                mainViewModel.getFavoriteBookLabel(
+            val tempFavoriteBookLabel = mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
+                bookDetailScreenViewModel.getFavoriteBookLabel(
                     it
                 )
             }
-            mainViewModel.viewModelScope.launch(Dispatchers.Main) {
+            bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.Main) {
 
                 if (tempBigImage != null) {
                     bigImage.value = tempBigImage
@@ -150,19 +151,19 @@ fun MainContent(mainViewModel: MainViewModel){
             modifier = Modifier
                 .clickable {
 
-                    mainViewModel.viewModelScope.launch(Dispatchers.IO) {
+                    bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
                         var temporaryFavoriteBookLabel =
-                            mainViewModel.selectedAppBook?.primaryIsbn13?.let {
+                            mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
                                 FavoriteBookLabel(
                                     it,
                                     !favoriteBookLabel.value.favorite
                                 )
                             }
 
-                        temporaryFavoriteBookLabel?.let { mainViewModel.addFavoriteBookLabel(it) }
+                        temporaryFavoriteBookLabel?.let { bookDetailScreenViewModel.addFavoriteBookLabel(it) }
 
-                        mainViewModel.viewModelScope.launch(Dispatchers.Main) {
+                        bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.Main) {
 
                             if (temporaryFavoriteBookLabel != null) {
                                 favoriteBookLabel.value = temporaryFavoriteBookLabel
@@ -197,7 +198,7 @@ fun MainContent(mainViewModel: MainViewModel){
             withStyle(
                 style = SpanStyle()
             ) {
-                append(mainViewModel.selectedAppBook?.title)
+                append(mainSharedViewModel.selectedAppBook?.title)
             }
         },
             modifier = Modifier
@@ -222,7 +223,7 @@ fun MainContent(mainViewModel: MainViewModel){
             withStyle(
                 style = SpanStyle()
             ) {
-                append(mainViewModel.selectedAppBook?.author)
+                append(mainSharedViewModel.selectedAppBook?.author)
             }
         },
             modifier = Modifier
@@ -247,7 +248,7 @@ fun MainContent(mainViewModel: MainViewModel){
             withStyle(
                 style = SpanStyle()
             ) {
-                append(mainViewModel.selectedAppBook?.rank.toString())
+                append(mainSharedViewModel.selectedAppBook?.rank.toString())
             }
         },
             modifier = Modifier
@@ -272,7 +273,7 @@ fun MainContent(mainViewModel: MainViewModel){
             withStyle(
                 style = SpanStyle()
             ) {
-                append(mainViewModel.selectedAppBook?.publisher)
+                append(mainSharedViewModel.selectedAppBook?.publisher)
             }
         },
             modifier = Modifier
@@ -297,7 +298,7 @@ fun MainContent(mainViewModel: MainViewModel){
             withStyle(
                 style = SpanStyle()
             ) {
-                append(mainViewModel.selectedAppBook?.description)
+                append(mainSharedViewModel.selectedAppBook?.description)
             }
         },
             modifier = Modifier

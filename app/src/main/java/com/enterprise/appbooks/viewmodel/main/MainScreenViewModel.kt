@@ -1,4 +1,4 @@
-package com.enterprise.appbooks.viewmodel
+package com.enterprise.appbooks.viewmodel.main
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -14,24 +14,20 @@ import com.enterprise.appbooks.constants.nytimes.ImageConstants
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.BigImage
 import com.enterprise.appbooks.model.Book
-import com.enterprise.appbooks.model.BooksData
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.SmallImage
 import com.enterprise.appbooks.repository.AppRepository
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import javax.inject.Inject
 
+
 @HiltViewModel
-class MainViewModel @Inject constructor(private val appRepository: AppRepository)
+class MainScreenViewModel @Inject constructor(private val appRepository: AppRepository)
     : ViewModel(){
 
     private val TAG = "MainViewModel"
@@ -45,8 +41,6 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
     var isMainScreenButtonsEnabled = mutableStateOf(true)
 
     var mutableStateAllAppBooks = mutableStateListOf<AppBook>()
-
-    var selectedAppBook: AppBook? = null
 
     fun getBooks(context: Context) {
 
@@ -205,47 +199,6 @@ class MainViewModel @Inject constructor(private val appRepository: AppRepository
             isMainScreenButtonsEnabled.value = true
 
         }
-    }
-
-    fun getAllAppBooks() {
-
-        viewModelScope.launch(Dispatchers.IO) {
-
-            val listOfAppBooks = appRepository.getAllAppBooks()
-
-            viewModelScope.launch(Dispatchers.Main) {
-
-                var tempMutableStateAllAppBooks = mutableStateListOf<AppBook>()
-                tempMutableStateAllAppBooks.addAll(listOfAppBooks)
-
-                mutableStateAllAppBooks = tempMutableStateAllAppBooks
-
-            }
-
-        }
-
-    }
-
-    fun getFavoriteBookLabel(primaryIsbn13: String): FavoriteBookLabel? {
-        return appRepository.getFavoriteBookLabel(primaryIsbn13)
-    }
-
-    fun getSmallImage(primaryIsbn13: String): SmallImage?{
-
-        return appRepository.getSmallImage(primaryIsbn13)
-
-    }
-
-    fun getBigImage(primaryIsbn13: String): BigImage?{
-
-        return appRepository.getBigImage(primaryIsbn13)
-
-    }
-
-    fun addFavoriteBookLabel(favoriteBookLabel: FavoriteBookLabel){
-
-        appRepository.addFavoriteBookLabel(favoriteBookLabel)
-
     }
 
 }

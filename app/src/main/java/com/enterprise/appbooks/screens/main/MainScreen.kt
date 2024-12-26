@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.navigation.BooksScreens
@@ -39,24 +40,27 @@ import com.enterprise.appbooks.ui.theme.AppPrimaryColor
 import com.enterprise.appbooks.ui.theme.ProgressBarEndColor
 import com.enterprise.appbooks.ui.theme.ProgressBarStartColor
 import com.enterprise.appbooks.utils.internet.InternetManager
-import com.enterprise.appbooks.viewmodel.MainViewModel
+import com.enterprise.appbooks.viewmodel.main.MainScreenViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController, mainViewModel: MainViewModel, activityFinisher : () -> Unit){
+fun MainScreen(navController: NavController, activityFinisher : () -> Unit,
+               mainScreenViewModel: MainScreenViewModel = hiltViewModel<MainScreenViewModel>()
+){
 
     BackHandler{
         activityFinisher()
     }
 
-    BodyContent(navController, mainViewModel)
+    BodyContent(navController, mainScreenViewModel)
 
 }
 
 
 @Composable
 fun BodyContent(
-    navController: NavController, mainViewModel: MainViewModel
+    navController: NavController,
+    mainScreenViewModel: MainScreenViewModel
 ) {
 
 
@@ -104,16 +108,16 @@ fun BodyContent(
             )
 
             Button(
-                enabled = mainViewModel.isMainScreenButtonsEnabled.value,
+                enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
                 onClick = {
 
                     if(InternetManager.isInternetAvailable(context)){
-                        mainViewModel.mainScreenProgressBarFactor.value = 0.0f
-                        mainViewModel.mainScreenProgressBarPercent.value = 0
-                        mainViewModel.isMainScreenButtonsEnabled.value = false
-                        mainViewModel.mainScreenShowProgressIndicator.value = true
+                        mainScreenViewModel.mainScreenProgressBarFactor.value = 0.0f
+                        mainScreenViewModel.mainScreenProgressBarPercent.value = 0
+                        mainScreenViewModel.isMainScreenButtonsEnabled.value = false
+                        mainScreenViewModel.mainScreenShowProgressIndicator.value = true
 
-                        mainViewModel.getBooks(context)
+                        mainScreenViewModel.getBooks(context)
                     }else {
                         Toast.makeText(context, R.string.internet_is_not_available, Toast.LENGTH_LONG).show()
                     }
@@ -125,7 +129,7 @@ fun BodyContent(
             }
 
             Button(
-                enabled = mainViewModel.isMainScreenButtonsEnabled.value,
+                enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
                 onClick = { navController.navigate(BooksScreens.BookListScreen.name) },
                 colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
             ) {
@@ -134,11 +138,7 @@ fun BodyContent(
 
         }
 
-        if(mainViewModel.mainScreenShowProgressIndicator.value){
-
-
-
-
+        if(mainScreenViewModel.mainScreenShowProgressIndicator.value){
 
                 Row(
                     modifier = Modifier
@@ -173,13 +173,13 @@ fun BodyContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    val isButtonVisible = !mainViewModel.mainScreenProgressBarFactor.value.equals(0.0f)
+                    val isButtonVisible = !mainScreenViewModel.mainScreenProgressBarFactor.value.equals(0.0f)
                     if(isButtonVisible) {
                         Button(
                             contentPadding = PaddingValues(1.dp),
                             onClick = { },
                             modifier = Modifier
-                                .fillMaxWidth(mainViewModel.mainScreenProgressBarFactor.value)
+                                .fillMaxWidth(mainScreenViewModel.mainScreenProgressBarFactor.value)
                                 .background(
                                     brush = Brush.linearGradient(
                                         listOf(
@@ -194,7 +194,7 @@ fun BodyContent(
 
                 }
 
-                Text(text = mainViewModel.mainScreenProgressBarPercent.value.toString()+ stringResource(
+                Text(text = mainScreenViewModel.mainScreenProgressBarPercent.value.toString()+ stringResource(
                     id = R.string.main_screen_percent_sign), color = Color.Black,
                     modifier = Modifier.constrainAs(progressPercent) {
                     top.linkTo(parent.top, margin = 10.dp)

@@ -80,142 +80,167 @@ fun BodyContent(
 
     }
 
+    if(mainScreenViewModel.mainScreenShowProgressIndicator.value){
+
+        AppProgressIndicator(mainScreenViewModel.mainScreenProgressBarFactor,
+            mainScreenViewModel.mainScreenProgressBarPercent)
+
+    }
+
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 
-        val (topBar, mainBody, progressIndicator, progressPercent) = createRefs()
-
-        Surface(shadowElevation = 10.dp, modifier = Modifier
-            .padding(10.dp)
-            .fillMaxWidth()
-            .constrainAs(topBar) {
-                top.linkTo(parent.top, margin = 20.dp)
-                start.linkTo(parent.start, margin = 20.dp)
-                end.linkTo(parent.end, margin = 20.dp)
-            }){
-            Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)) {
-                Text(text = stringResource(R.string.main_screen_title),style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-
-            }
-        }
+        val (topBar, mainBody) = createRefs()
 
 
+        TopBar(modifier = Modifier.constrainAs(topBar) {
+            top.linkTo(parent.top, margin = 20.dp)
+            start.linkTo(parent.start, margin = 20.dp)
+            end.linkTo(parent.end, margin = 20.dp)
+        })
 
+        MainBody(modifier = Modifier.constrainAs(mainBody){
+            top.linkTo(parent.top, margin = 10.dp)
+            bottom.linkTo(parent.bottom, margin = 10.dp)
+            start.linkTo(parent.start, margin = 10.dp)
+            end.linkTo(parent.end, margin = 10.dp)
+        }, mainScreenViewModel = mainScreenViewModel, navController = navController)
 
-        val context = LocalContext.current
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .constrainAs(mainBody){
-                    top.linkTo(parent.top, margin = 10.dp)
-                    bottom.linkTo(parent.bottom, margin = 10.dp)
-                    start.linkTo(parent.start, margin = 10.dp)
-                    end.linkTo(parent.end, margin = 10.dp)
-                }) {
+    }
 
+}
 
-            Image(
-                painter = painterResource(id = R.drawable.baseline_menu_book_200),
-                contentDescription = "book",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(200.dp)
-            )
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppProgressIndicator(progressBarFactor: MutableState<Float>, progressBarPercent: MutableState<Int>) {
 
-            Button(
-                enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
-                onClick = {
+    BasicAlertDialog(onDismissRequest = {
+        // Dismiss the dialog when the user clicks outside the dialog or on the back button.
+        //isDialogVisible.value = false
+    }) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 
-                        mainScreenViewModel.getBooks(context)
+            val (progressIndicator, progressPercent) = createRefs()
 
-                     },
-                colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
-            ) {
-                Text(text = stringResource(R.string.main_screen_download_books_button))
-            }
-
-            Button(
-                enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
-                onClick = { navController.navigate(BooksScreens.BookListScreen.name) },
-                colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
-            ) {
-                Text(text = stringResource(R.string.main_screen_list_books_button))
-            }
-
-        }
-
-        if(mainScreenViewModel.mainScreenShowProgressIndicator.value){
-
-                Row(
-                    modifier = Modifier
+            Row(
+                modifier = Modifier
                     .constrainAs(progressIndicator) {
                         top.linkTo(parent.top, margin = 10.dp)
                         bottom.linkTo(parent.bottom, margin = 10.dp)
                         start.linkTo(parent.start, margin = 10.dp)
                         end.linkTo(parent.end, margin = 10.dp)
                     }
-                        .padding(3.dp)
-                        .fillMaxWidth(0.8f)
-                        .height(35.dp)
-                        .border(
-                            width = 2.dp,
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color.Red,
-                                    Color.Red
+                    .padding(3.dp)
+                    .fillMaxWidth(0.8f)
+                    .height(35.dp)
+                    .border(
+                        width = 2.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.Red,
+                                Color.Red
+                            )
+                        ),
+                        shape = RoundedCornerShape(34.dp)
+                    )
+                    .clip(
+                        RoundedCornerShape(
+                            topStartPercent = 50,
+                            topEndPercent = 50,
+                            bottomEndPercent = 50,
+                            bottomStartPercent = 50
+                        )
+                    )
+                    .background(Color.White),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                val isButtonVisible = !progressBarFactor.value.equals(0.0f)
+                if (isButtonVisible) {
+                    Button(
+                        contentPadding = PaddingValues(1.dp),
+                        onClick = { },
+                        modifier = Modifier
+                            .fillMaxWidth(progressBarFactor.value)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    listOf(
+                                        ProgressBarStartColor, ProgressBarEndColor
+                                    )
                                 )
                             ),
-                            shape = RoundedCornerShape(34.dp)
-                        )
-                        .clip(
-                            RoundedCornerShape(
-                                topStartPercent = 50,
-                                topEndPercent = 50,
-                                bottomEndPercent = 50,
-                                bottomStartPercent = 50
-                            )
-                        )
-                        .background(Color.White),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    val isButtonVisible = !mainScreenViewModel.mainScreenProgressBarFactor.value.equals(0.0f)
-                    if(isButtonVisible) {
-                        Button(
-                            contentPadding = PaddingValues(1.dp),
-                            onClick = { },
-                            modifier = Modifier
-                                .fillMaxWidth(mainScreenViewModel.mainScreenProgressBarFactor.value)
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        listOf(
-                                            ProgressBarStartColor, ProgressBarEndColor
-                                        )
-                                    )
-                                ),
-                            enabled = false,
-                            elevation = null,
-                        ) { }
-                    }
-
+                        enabled = false,
+                        elevation = null,
+                    ) { }
                 }
 
-                Text(text = mainScreenViewModel.mainScreenProgressBarPercent.value.toString()+ stringResource(
-                    id = R.string.main_screen_percent_sign), color = Color.Black,
-                    modifier = Modifier.constrainAs(progressPercent) {
+            }
+
+            Text(text = progressBarPercent.value.toString() + stringResource(
+                id = R.string.main_screen_percent_sign
+            ), color = Color.Black,
+                modifier = Modifier.constrainAs(progressPercent) {
                     top.linkTo(parent.top, margin = 10.dp)
                     bottom.linkTo(parent.bottom, margin = 10.dp)
                     start.linkTo(parent.start, margin = 10.dp)
                     end.linkTo(parent.end, margin = 10.dp)
                 })
 
+        }
+    }
+}
 
-            }
+@Composable
+fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navController: NavController) {
+    val context = LocalContext.current
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
 
+        Image(
+            painter = painterResource(id = R.drawable.baseline_menu_book_200),
+            contentDescription = "book",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.size(200.dp)
+        )
 
+        Button(
+            enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
+            onClick = {
+
+                mainScreenViewModel.getBooks(context)
+
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
+        ) {
+            Text(text = stringResource(R.string.main_screen_download_books_button))
+        }
+
+        Button(
+            enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
+            onClick = { navController.navigate(BooksScreens.BookListScreen.name) },
+            colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
+        ) {
+            Text(text = stringResource(R.string.main_screen_list_books_button))
+        }
 
     }
 
+}
+
+@Composable
+fun TopBar(modifier: Modifier) {
+    Surface(shadowElevation = 10.dp, modifier = modifier
+        .padding(10.dp)
+        .fillMaxWidth()
+    ){
+        Column(horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)) {
+            Text(text = stringResource(R.string.main_screen_title),style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+
+        }
+    }
 }
 
 

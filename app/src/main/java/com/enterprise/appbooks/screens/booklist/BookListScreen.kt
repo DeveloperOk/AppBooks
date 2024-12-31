@@ -18,10 +18,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -30,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
@@ -115,8 +118,6 @@ fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreen
 @Composable
 fun LazyColumnRowBody(navController: NavController, appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
 
-    val context = LocalContext.current
-
     val smallImage = remember { mutableStateOf(SmallImage()) }
     val favoriteBookLabel = remember { mutableStateOf(FavoriteBookLabel()) }
 
@@ -146,95 +147,131 @@ fun LazyColumnRowBody(navController: NavController, appBook: AppBook, bookListSc
             .fillMaxSize()
             .padding(4.dp)) {
 
-            val (bookImage, informationContainer, favoriteImage) = createRefs()
+            val (bookImage, titleAndAuthorContainer, favoriteImage) = createRefs()
 
-            Image(
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(200.dp)
-                    .constrainAs(bookImage) {
-                        top.linkTo(parent.top, margin = 0.dp)
-                        start.linkTo(parent.start, margin = 0.dp)
-                        bottom.linkTo(parent.bottom, margin = 0.dp)
-                    },
-                bitmap = it,
-                contentDescription = "image of book",
-                contentScale = ContentScale.Fit
-            )
-
-            ConstraintLayout(modifier = Modifier
-                .wrapContentSize()
-                .constrainAs(informationContainer) {
-                    top.linkTo(parent.top, margin = 0.dp)
-                    start.linkTo(bookImage.end, margin = 0.dp)
-                    bottom.linkTo(parent.bottom, margin = 0.dp)
-                }) {
-
-                val (title, author) = createRefs()
-
-                LazyRow(modifier= Modifier
-                    .width(180.dp)
-                    .constrainAs(title) {
-                        top.linkTo(parent.top, margin = 0.dp)
-                        start.linkTo(parent.start, margin = 0.dp)
-                        bottom.linkTo(author.top, margin = 0.dp)
-                    }){
-
-                    item {
-                        appBook.title?.let { it1 ->
-                            Text(text = it1,
-                                Modifier.padding(2.dp),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-
-                }
-
-                LazyRow(modifier= Modifier
-                    .width(180.dp)
-                    .constrainAs(author) {
-                        top.linkTo(title.bottom, margin = 0.dp)
-                        start.linkTo(parent.start, margin = 0.dp)
-                        bottom.linkTo(parent.bottom, margin = 0.dp)
-                    }){
-                    item {
-                        appBook.author?.let { it1 ->
-                            Text(text = it1,
-                                Modifier.padding(2.dp),
-                                style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-
-                }
-
-            }
+            BookImage(modifier = Modifier.constrainAs(bookImage) {
+                top.linkTo(parent.top, margin = 0.dp)
+                start.linkTo(parent.start, margin = 0.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }, imageBitmap = it)
 
 
-            var favouriteImagePainter: Painter? = null
-            if(favoriteBookLabel.value.favorite){
-                favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_50)
-            }else{
-                favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_border_50)
-            }
+            TitleAndAuthorContainer(modifier = Modifier.constrainAs(titleAndAuthorContainer) {
+                top.linkTo(parent.top, margin = 0.dp)
+                start.linkTo(bookImage.end, margin = 0.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }, appBook = appBook)
 
-            Image(
-                modifier = Modifier
-                    .width(50.dp)
-                    .height(50.dp)
-                    .constrainAs(favoriteImage) {
-                        top.linkTo(parent.top, margin = 10.dp)
-                        end.linkTo(parent.end, margin = 10.dp)
-                    },
-                painter = favouriteImagePainter,
-                contentDescription = "image of favorite",
-                contentScale = ContentScale.Fit
-            )
+            FavouriteImage(modifier = Modifier
+                .constrainAs(favoriteImage) {
+                    top.linkTo(parent.top, margin = 10.dp)
+                    end.linkTo(parent.end, margin = 10.dp)
+                }, favoriteBookLabel = favoriteBookLabel)
 
 
         }
     }
     }
+
+@Composable
+fun TitleAndAuthorContainer(modifier: Modifier, appBook: AppBook) {
+
+    ConstraintLayout(modifier = modifier
+        .wrapContentSize()
+    ) {
+
+        val (title, author) = createRefs()
+
+        TitleText(modifier = Modifier.constrainAs(title) {
+            top.linkTo(parent.top, margin = 0.dp)
+            start.linkTo(parent.start, margin = 0.dp)
+            bottom.linkTo(author.top, margin = 0.dp)
+        }, appBook = appBook)
+
+        AuthorText(modifier= Modifier
+            .constrainAs(author) {
+                top.linkTo(title.bottom, margin = 0.dp)
+                start.linkTo(parent.start, margin = 0.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }, appBook = appBook)
+
+    }
+
+}
+
+@Composable
+private fun BookImage(
+    modifier: Modifier,
+    imageBitmap: ImageBitmap
+) {
+    Image(
+        modifier = modifier
+            .width(150.dp)
+            .height(200.dp),
+        bitmap = imageBitmap,
+        contentDescription = "image of book",
+        contentScale = ContentScale.Fit
+    )
+}
+
+@Composable
+fun FavouriteImage(modifier: Modifier, favoriteBookLabel: MutableState<FavoriteBookLabel>) {
+
+    var favouriteImagePainter: Painter? = null
+    if(favoriteBookLabel.value.favorite){
+        favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_50)
+    }else{
+        favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_border_50)
+    }
+
+    Image(
+        modifier = modifier
+            .width(50.dp)
+            .height(50.dp),
+        painter = favouriteImagePainter,
+        contentDescription = "image of favorite",
+        contentScale = ContentScale.Fit
+    )
+
+}
+
+@Composable
+fun AuthorText(modifier: Modifier, appBook: AppBook) {
+    LazyRow(modifier= modifier
+        .width(180.dp)){
+        item {
+            appBook.author?.let { it1 ->
+                Text(text = it1,
+                    Modifier.padding(2.dp),
+                    style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun TitleText(
+    modifier: Modifier,
+    appBook: AppBook
+) {
+    LazyRow(modifier = modifier
+        .width(180.dp)
+        ) {
+
+        item {
+            appBook.title?.let { it1 ->
+                Text(
+                    text = it1,
+                    Modifier.padding(2.dp),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+    }
+}
 
 
 

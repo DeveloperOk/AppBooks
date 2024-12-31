@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
@@ -104,8 +107,6 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
 
         }
 
-
-
     } )
 
     ConstraintLayout(modifier = Modifier
@@ -124,195 +125,157 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
                 bottom.linkTo(bookImage.top, margin = 0.dp)
             })
 
+        BookImage(modifier = Modifier.constrainAs(bookImage) {
+            top.linkTo(topSpacer.bottom, margin = 0.dp)
+            start.linkTo(parent.start, margin = 0.dp)
+            end.linkTo(parent.end, margin = 0.dp)
+            bottom.linkTo(title.top, margin = 0.dp)
+        },
+            bigImage = bigImage)
 
-        bigImage.value.bigImage?.asImageBitmap()?.let {
-            Image(
-                modifier = Modifier
-                    .width(300.dp)
-                    .height(400.dp)
-                    .constrainAs(bookImage) {
-                        top.linkTo(topSpacer.bottom, margin = 0.dp)
-                        start.linkTo(parent.start, margin = 0.dp)
-                        end.linkTo(parent.end, margin = 0.dp)
-                        bottom.linkTo(title.top, margin = 0.dp)
-                    },
-                bitmap = it,
-                contentDescription = "image of book",
-                contentScale = ContentScale.Fit
+        FavouriteImage(modifier = Modifier.constrainAs(favoriteImage) {
+            top.linkTo(parent.top, margin = 0.dp)
+            end.linkTo(parent.end, margin = 0.dp)
+        },
+        favoriteBookLabel, bookDetailScreenViewModel, mainSharedViewModel)
+
+        AppText(modifier = Modifier.constrainAs(title) {
+            top.linkTo(bookImage.bottom, margin = 0.dp)
+            start.linkTo(parent.start, margin = 0.dp)
+            end.linkTo(parent.end, margin = 0.dp)
+            bottom.linkTo(author.top, margin = 0.dp)
+        }, label = stringResource(id = R.string.book_detail_screen_app_book_title),
+            text = mainSharedViewModel.selectedAppBook?.title)
+
+        AppText(modifier = Modifier
+            .constrainAs(author) {
+                top.linkTo(title.bottom, margin = 0.dp)
+                start.linkTo(parent.start, margin = 0.dp)
+                end.linkTo(parent.end, margin = 0.dp)
+                bottom.linkTo(rank.top, margin = 0.dp)
+            },
+            label = stringResource(id = R.string.book_detail_screen_app_book_author),
+            text = mainSharedViewModel.selectedAppBook?.author)
+
+        AppText(modifier = Modifier.constrainAs(rank) {
+            top.linkTo(author.bottom, margin = 0.dp)
+            start.linkTo(parent.start, margin = 0.dp)
+            end.linkTo(parent.end, margin = 0.dp)
+            bottom.linkTo(publisher.top, margin = 0.dp)
+        },
+            label = stringResource(id = R.string.book_detail_screen_app_book_rank),
+            text = mainSharedViewModel.selectedAppBook?.rank.toString())
+
+        AppText(modifier = Modifier.constrainAs(publisher) {
+            top.linkTo(rank.bottom, margin = 0.dp)
+            start.linkTo(parent.start, margin = 0.dp)
+            end.linkTo(parent.end, margin = 0.dp)
+            bottom.linkTo(description.top, margin = 0.dp)
+        },
+        label = stringResource(id = R.string.book_detail_screen_app_book_publisher),
+        text = mainSharedViewModel.selectedAppBook?.publisher)
+
+        AppText(modifier = Modifier.constrainAs(description) {
+                top.linkTo(publisher.bottom, margin = 0.dp)
+                start.linkTo(parent.start, margin = 0.dp)
+                end.linkTo(parent.end, margin = 0.dp)
+                bottom.linkTo(parent.bottom, margin = 20.dp)
+            },
+            label = stringResource(id = R.string.book_detail_screen_app_book_description),
+            text = mainSharedViewModel.selectedAppBook?.description)
+
+    }
+
+}
+
+@Composable
+private fun AppText(modifier : Modifier,
+    label: String,
+    text: String?
+) {
+    Text(text = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                fontWeight = FontWeight.Bold
             )
+        ) {
+            append(label)
         }
-
-
-        var favouriteImagePainter: Painter? = null
-        if (favoriteBookLabel.value.favorite) {
-            favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_100)
-        } else {
-            favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_border_100)
+        withStyle(
+            style = SpanStyle()
+        ) {
+            append(text)
         }
+    },
+    modifier = modifier
+            .padding(2.dp),
+    textAlign = TextAlign.Center)
+}
 
-        Image(
-            modifier = Modifier
-                .clickable {
+@Composable
+private fun FavouriteImage(modifier: Modifier,
+    favoriteBookLabel: MutableState<FavoriteBookLabel>,
+    bookDetailScreenViewModel: BookDetailScreenViewModel,
+    mainSharedViewModel: MainSharedViewModel
+) {
+    var favouriteImagePainter: Painter? = null
+    if (favoriteBookLabel.value.favorite) {
+        favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_100)
+    } else {
+        favouriteImagePainter = painterResource(R.drawable.ic_baseline_favorite_border_100)
+    }
 
-                    bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
+    Image(
+        modifier = modifier
+            .clickable {
 
-                        var temporaryFavoriteBookLabel =
-                            mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
-                                FavoriteBookLabel(
-                                    it,
-                                    !favoriteBookLabel.value.favorite
-                                )
-                            }
+                bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
-                        temporaryFavoriteBookLabel?.let { bookDetailScreenViewModel.addFavoriteBookLabel(it) }
+                    var temporaryFavoriteBookLabel =
+                        mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
+                            FavoriteBookLabel(
+                                it,
+                                !favoriteBookLabel.value.favorite
+                            )
+                        }
 
-                        bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.Main) {
+                    temporaryFavoriteBookLabel?.let {
+                        bookDetailScreenViewModel.addFavoriteBookLabel(
+                            it
+                        )
+                    }
 
-                            if (temporaryFavoriteBookLabel != null) {
-                                favoriteBookLabel.value = temporaryFavoriteBookLabel
-                            }
+                    bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.Main) {
 
+                        if (temporaryFavoriteBookLabel != null) {
+                            favoriteBookLabel.value = temporaryFavoriteBookLabel
                         }
 
                     }
 
                 }
-                .width(100.dp)
-                .height(100.dp)
-                .constrainAs(favoriteImage) {
-                    top.linkTo(parent.top, margin = 0.dp)
-                    end.linkTo(parent.end, margin = 0.dp)
-                },
-            painter = favouriteImagePainter,
-            contentDescription = "image of favorite",
+
+            }
+            .width(100.dp)
+            .height(100.dp),
+        painter = favouriteImagePainter,
+        contentDescription = "image of favorite",
+        contentScale = ContentScale.Fit
+    )
+}
+
+@Composable
+fun BookImage(modifier: Modifier, bigImage: MutableState<BigImage>) {
+
+    bigImage.value.bigImage?.asImageBitmap()?.let {
+        Image(
+            modifier = modifier
+                .width(300.dp)
+                .height(400.dp),
+            bitmap = it,
+            contentDescription = "image of book",
             contentScale = ContentScale.Fit
         )
-
-
-        Text(text = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append(stringResource(id = R.string.book_detail_screen_app_book_title))
-
-            }
-            withStyle(
-                style = SpanStyle()
-            ) {
-                append(mainSharedViewModel.selectedAppBook?.title)
-            }
-        },
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(title) {
-                    top.linkTo(bookImage.bottom, margin = 0.dp)
-                    start.linkTo(parent.start, margin = 0.dp)
-                    end.linkTo(parent.end, margin = 0.dp)
-                    bottom.linkTo(author.top, margin = 0.dp)
-                })
-
-
-        Text(text = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append(stringResource(id = R.string.book_detail_screen_app_book_author))
-
-            }
-            withStyle(
-                style = SpanStyle()
-            ) {
-                append(mainSharedViewModel.selectedAppBook?.author)
-            }
-        },
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(author) {
-                    top.linkTo(title.bottom, margin = 0.dp)
-                    start.linkTo(parent.start, margin = 0.dp)
-                    end.linkTo(parent.end, margin = 0.dp)
-                    bottom.linkTo(rank.top, margin = 0.dp)
-                })
-
-
-        Text(text = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append(stringResource(id = R.string.book_detail_screen_app_book_rank))
-
-            }
-            withStyle(
-                style = SpanStyle()
-            ) {
-                append(mainSharedViewModel.selectedAppBook?.rank.toString())
-            }
-        },
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(rank) {
-                    top.linkTo(author.bottom, margin = 0.dp)
-                    start.linkTo(parent.start, margin = 0.dp)
-                    end.linkTo(parent.end, margin = 0.dp)
-                    bottom.linkTo(publisher.top, margin = 0.dp)
-                })
-
-
-        Text(text = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append(stringResource(id = R.string.book_detail_screen_app_book_publisher))
-
-            }
-            withStyle(
-                style = SpanStyle()
-            ) {
-                append(mainSharedViewModel.selectedAppBook?.publisher)
-            }
-        },
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(publisher) {
-                    top.linkTo(rank.bottom, margin = 0.dp)
-                    start.linkTo(parent.start, margin = 0.dp)
-                    end.linkTo(parent.end, margin = 0.dp)
-                    bottom.linkTo(description.top, margin = 0.dp)
-                })
-
-
-        Text(text = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append(stringResource(id = R.string.book_detail_screen_app_book_description))
-
-            }
-            withStyle(
-                style = SpanStyle()
-            ) {
-                append(mainSharedViewModel.selectedAppBook?.description)
-            }
-        },
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(description) {
-                    top.linkTo(publisher.bottom, margin = 0.dp)
-                    start.linkTo(parent.start, margin = 0.dp)
-                    end.linkTo(parent.end, margin = 0.dp)
-                    bottom.linkTo(parent.bottom, margin = 20.dp)
-                }, textAlign = TextAlign.Center)
-
     }
 
 }

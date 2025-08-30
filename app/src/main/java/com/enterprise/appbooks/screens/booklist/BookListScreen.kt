@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
@@ -59,6 +60,7 @@ fun BookListScreen(navController: NavController,
 
     } )
 
+    val allAppBooks = bookListScreenViewModel.mutableStateAllAppBooks.collectAsStateWithLifecycle()
 
     LazyRow{
 
@@ -68,7 +70,7 @@ fun BookListScreen(navController: NavController,
                 contentPadding = PaddingValues(2.dp)
             ) {
 
-                if(bookListScreenViewModel.mutableStateAllAppBooks.isNullOrEmpty()){
+                if(allAppBooks.value.isNullOrEmpty()){
 
                     item{
                         Text(text = stringResource(R.string.no_data_to_display))
@@ -76,7 +78,7 @@ fun BookListScreen(navController: NavController,
 
                 }else{
 
-                    items(bookListScreenViewModel.mutableStateAllAppBooks) { appBook ->
+                    items(allAppBooks.value) { appBook ->
 
                         LazyColumnRow(navController, appBook, bookListScreenViewModel, mainSharedViewModel)
 

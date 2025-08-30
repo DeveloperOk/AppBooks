@@ -1,6 +1,5 @@
 package com.enterprise.appbooks.screens.main
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,14 +43,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.navigation.BooksScreens
 import com.enterprise.appbooks.ui.theme.AppPrimaryColor
 import com.enterprise.appbooks.ui.theme.ProgressBarEndColor
 import com.enterprise.appbooks.ui.theme.ProgressBarStartColor
-import com.enterprise.appbooks.utils.internet.InternetManager
 import com.enterprise.appbooks.viewmodel.main.MainScreenViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 
 @Composable
@@ -74,13 +75,18 @@ fun BodyContent(
     mainScreenViewModel: MainScreenViewModel
 ) {
 
-    if(mainScreenViewModel.isNoInternetConnectionDialogVisible.value){
+
+    val isNoInternetConnectionDialogVisible = mainScreenViewModel.isNoInternetConnectionDialogVisible.collectAsStateWithLifecycle()
+
+    if(isNoInternetConnectionDialogVisible.value){
 
         NoInternetConnectionDialog(isDialogVisible = mainScreenViewModel.isNoInternetConnectionDialogVisible)
 
     }
 
-    if(mainScreenViewModel.mainScreenShowProgressIndicator.value){
+    val mainScreenShowProgressIndicator = mainScreenViewModel.mainScreenShowProgressIndicator.collectAsStateWithLifecycle()
+
+    if(mainScreenShowProgressIndicator.value){
 
         AppProgressIndicator(mainScreenViewModel.mainScreenProgressBarFactor,
             mainScreenViewModel.mainScreenProgressBarPercent)
@@ -111,7 +117,10 @@ fun BodyContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppProgressIndicator(progressBarFactor: MutableState<Float>, progressBarPercent: MutableState<Int>) {
+fun AppProgressIndicator(inputProgressBarFactor: MutableStateFlow<Float>, inputProgressBarPercent: MutableStateFlow<Int>) {
+
+    val progressBarFactor = inputProgressBarFactor.collectAsStateWithLifecycle()
+    val progressBarPercent = inputProgressBarPercent.collectAsStateWithLifecycle()
 
     BasicAlertDialog(onDismissRequest = {
         // Dismiss the dialog when the user clicks outside the dialog or on the back button.
@@ -192,6 +201,9 @@ fun AppProgressIndicator(progressBarFactor: MutableState<Float>, progressBarPerc
 @Composable
 fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navController: NavController) {
     val context = LocalContext.current
+
+    val isMainScreenButtonsEnabled = mainScreenViewModel.isMainScreenButtonsEnabled.collectAsStateWithLifecycle()
+
     Column(horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
@@ -204,7 +216,7 @@ fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navCon
         )
 
         Button(
-            enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
+            enabled = isMainScreenButtonsEnabled.value,
             onClick = {
 
                 mainScreenViewModel.getBooks(context)
@@ -216,7 +228,7 @@ fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navCon
         }
 
         Button(
-            enabled = mainScreenViewModel.isMainScreenButtonsEnabled.value,
+            enabled = isMainScreenButtonsEnabled.value,
             onClick = { navController.navigate(BooksScreens.BookListScreen.name) },
             colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
         ) {
@@ -246,7 +258,7 @@ fun TopBar(modifier: Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoInternetConnectionDialog(isDialogVisible: MutableState<Boolean>) {
+fun NoInternetConnectionDialog(isDialogVisible: MutableStateFlow<Boolean>) {
 
     BasicAlertDialog(onDismissRequest = {
         // Dismiss the dialog when the user clicks outside the dialog or on the back button.
@@ -285,7 +297,7 @@ fun NoInternetConnectionDialog(isDialogVisible: MutableState<Boolean>) {
             Button(colors = ButtonDefaults.buttonColors(containerColor = Color.Green),
                 onClick = {
 
-                    isDialogVisible.value = false
+                    isDialogVisible.update{ currentValue -> false }
 
                 }) {
 

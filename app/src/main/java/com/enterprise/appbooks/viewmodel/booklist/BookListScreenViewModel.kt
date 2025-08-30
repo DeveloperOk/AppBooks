@@ -10,6 +10,8 @@ import com.enterprise.appbooks.model.SmallImage
 import com.enterprise.appbooks.repository.AppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,7 +20,9 @@ import javax.inject.Inject
 class BookListScreenViewModel @Inject constructor(private val appRepository: AppRepository)
     : ViewModel(){
 
-    var mutableStateAllAppBooks = mutableStateListOf<AppBook>()
+
+    var mutableStateAllAppBooks = MutableStateFlow(arrayListOf<AppBook>())
+
 
     fun getAllAppBooks() {
 
@@ -26,14 +30,7 @@ class BookListScreenViewModel @Inject constructor(private val appRepository: App
 
             val listOfAppBooks = appRepository.getAllAppBooks()
 
-            viewModelScope.launch(Dispatchers.Main) {
-
-                var tempMutableStateAllAppBooks = mutableStateListOf<AppBook>()
-                tempMutableStateAllAppBooks.addAll(listOfAppBooks)
-
-                mutableStateAllAppBooks = tempMutableStateAllAppBooks
-
-            }
+            mutableStateAllAppBooks.update { currentValue -> listOfAppBooks as ArrayList }
 
         }
 

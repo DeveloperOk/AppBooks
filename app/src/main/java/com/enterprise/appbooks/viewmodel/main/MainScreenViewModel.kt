@@ -22,6 +22,8 @@ import com.enterprise.appbooks.repository.AppRepository
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,22 +37,22 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
     private val TAG = "MainViewModel"
     private val onFailureText = "onFailure: "
 
-    var mainScreenShowProgressIndicator = mutableStateOf(false)
-    var mainScreenProgressBarFactor: MutableState<Float> = mutableStateOf(0.0f)
-    var mainScreenProgressBarPercent: MutableState<Int> = mutableStateOf(0)
+    var mainScreenShowProgressIndicator = MutableStateFlow(false)
+    var mainScreenProgressBarFactor = MutableStateFlow<Float>(0.0f)
+    var mainScreenProgressBarPercent = MutableStateFlow<Int>(0)
 
-    var isMainScreenButtonsEnabled = mutableStateOf(true)
+    var isMainScreenButtonsEnabled = MutableStateFlow(true)
 
-    val isNoInternetConnectionDialogVisible = mutableStateOf(false)
+    val isNoInternetConnectionDialogVisible = MutableStateFlow(false)
 
     fun getBooks(context: Context) {
 
         viewModelScope.launch(Dispatchers.Main) {
 
-            mainScreenProgressBarFactor.value = 0.0f
-            mainScreenProgressBarPercent.value = 0
-            isMainScreenButtonsEnabled.value = false
-            mainScreenShowProgressIndicator.value = true
+            mainScreenProgressBarFactor.update{ currentValue -> 0.0f }
+            mainScreenProgressBarPercent.update{ currentValue -> 0 }
+            isMainScreenButtonsEnabled.update{ currentValue -> false }
+            mainScreenShowProgressIndicator.update{ currentValue ->true }
 
             viewModelScope.launch(Dispatchers.IO) {
 
@@ -102,9 +104,9 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                 ).show()
             }
 
-            mainScreenShowProgressIndicator.value = false
-            isMainScreenButtonsEnabled.value = true
-            isNoInternetConnectionDialogVisible.value = showNoInternetConnectionPopup
+            mainScreenShowProgressIndicator.update{ currentValue -> false }
+            isMainScreenButtonsEnabled.update{ currentValue ->  true }
+            isNoInternetConnectionDialogVisible.update{ currentValue -> showNoInternetConnectionPopup }
 
 
         }
@@ -178,10 +180,10 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                                     TAG,
                                     "Factor: " + mainScreenProgressBarFactor.value.toString()
                                 )
-                                mainScreenProgressBarFactor.value =
-                                    index.toFloat() / sizeOfbooks.toFloat()
-                                mainScreenProgressBarPercent.value =
-                                    (mainScreenProgressBarFactor.value * 100).toInt()
+                                mainScreenProgressBarFactor.update{ currentValue ->
+                                    index.toFloat() / sizeOfbooks.toFloat() }
+                                mainScreenProgressBarPercent.update{ currentValue ->
+                                    (mainScreenProgressBarFactor.value * 100).toInt() }
 
                             }
 
@@ -203,8 +205,8 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
     private fun handleEndOfProcess(messageTextId: Int, context: Context) {
         viewModelScope.launch(Dispatchers.Main) {
 
-            mainScreenProgressBarFactor.value = 1.0f
-            mainScreenProgressBarPercent.value = 100
+            mainScreenProgressBarFactor.update{ currentValue -> 1.0f }
+            mainScreenProgressBarPercent.update{ currentValue -> 100 }
 
             Toast.makeText(
                 context,
@@ -212,8 +214,8 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                 Toast.LENGTH_LONG
             ).show()
 
-            mainScreenShowProgressIndicator.value = false
-            isMainScreenButtonsEnabled.value = true
+            mainScreenShowProgressIndicator.update{ currentValue -> false }
+            isMainScreenButtonsEnabled.update{ currentValue -> true }
 
         }
     }

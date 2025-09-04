@@ -42,16 +42,15 @@ import com.enterprise.appbooks.R
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.SmallImage
-import com.enterprise.appbooks.navigation.BooksScreens
+import com.enterprise.appbooks.model.screens.BookDetailScreenData
 import com.enterprise.appbooks.ui.theme.ListBookScreenRowBorder
-import com.enterprise.appbooks.viewmodel.MainSharedViewModel
 import com.enterprise.appbooks.viewmodel.booklist.BookListScreenViewModel
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun BookListScreen(navController: NavController,
-                   mainSharedViewModel: MainSharedViewModel,
                    bookListScreenViewModel:BookListScreenViewModel = hiltViewModel<BookListScreenViewModel>()){
 
     LaunchedEffect(key1 = true, block = {
@@ -80,7 +79,7 @@ fun BookListScreen(navController: NavController,
 
                     items(allAppBooks.value) { appBook ->
 
-                        LazyColumnRow(navController, appBook, bookListScreenViewModel, mainSharedViewModel)
+                        LazyColumnRow(navController, appBook, bookListScreenViewModel)
 
                     }
 
@@ -95,7 +94,7 @@ fun BookListScreen(navController: NavController,
 }
 
 @Composable
-fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel, mainSharedViewModel: MainSharedViewModel ){
+fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
 
     Surface(shadowElevation = 10.dp,
         modifier = Modifier
@@ -103,8 +102,9 @@ fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreen
             .width(350.dp)
             .height(240.dp)
             .clickable {
-                mainSharedViewModel.selectedAppBook = appBook
-                navController.navigate(BooksScreens.BookDetailScreen.name)
+                val gson = Gson()
+                val appBookSerialized = gson.toJson(appBook)
+                navController.navigate(BookDetailScreenData(appBookSerialized = appBookSerialized))
             },
         shape = RoundedCornerShape(15.dp),
         color = Color.White,

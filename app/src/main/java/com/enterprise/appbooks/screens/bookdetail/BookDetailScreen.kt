@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -31,23 +30,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
+import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.BigImage
 import com.enterprise.appbooks.model.FavoriteBookLabel
-import com.enterprise.appbooks.viewmodel.MainSharedViewModel
+import com.enterprise.appbooks.model.screens.BookDetailScreenData
 import com.enterprise.appbooks.viewmodel.bookdetail.BookDetailScreenViewModel
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailScreen(navController: NavController, mainSharedViewModel: MainSharedViewModel,
-                     bookDetailScreenViewModel: BookDetailScreenViewModel = hiltViewModel<BookDetailScreenViewModel>()
+fun BookDetailScreen(
+    navController: NavController,
+    bookDetailScreenViewModel: BookDetailScreenViewModel = hiltViewModel<BookDetailScreenViewModel>(),
+    bookDetailScreenData: BookDetailScreenData
 ){
+
+    val appBook = remember {
+        val gson = Gson()
+        val appBook = gson.fromJson(bookDetailScreenData.appBookSerialized, AppBook::class.java)
+        appBook
+    }
 
     LazyRow(modifier = Modifier
         .fillMaxSize().background(color = Color.White)){
@@ -59,8 +67,9 @@ fun BookDetailScreen(navController: NavController, mainSharedViewModel: MainShar
 
                 item{
 
-                    MainContent(mainSharedViewModel = mainSharedViewModel,
-                        bookDetailScreenViewModel = bookDetailScreenViewModel)
+                    MainContent(
+                        bookDetailScreenViewModel = bookDetailScreenViewModel, appBook = appBook,
+                    )
 
                 }
 
@@ -73,7 +82,10 @@ fun BookDetailScreen(navController: NavController, mainSharedViewModel: MainShar
 }
 
 @Composable
-fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewModel: BookDetailScreenViewModel){
+fun MainContent(
+    bookDetailScreenViewModel: BookDetailScreenViewModel,
+    appBook: AppBook
+){
 
     val bigImage = remember { mutableStateOf(BigImage()) }
     val favoriteBookLabel = remember { mutableStateOf(FavoriteBookLabel()) }
@@ -83,12 +95,12 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
 
         bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
-            val tempBigImage = mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
+            val tempBigImage = appBook?.primaryIsbn13?.let {
                 bookDetailScreenViewModel.getBigImage(
                     it
                 )
             }
-            val tempFavoriteBookLabel = mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
+            val tempFavoriteBookLabel = appBook?.primaryIsbn13?.let {
                 bookDetailScreenViewModel.getFavoriteBookLabel(
                     it
                 )
@@ -137,7 +149,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
             top.linkTo(parent.top, margin = 0.dp)
             end.linkTo(parent.end, margin = 0.dp)
         },
-        favoriteBookLabel, bookDetailScreenViewModel, mainSharedViewModel)
+        favoriteBookLabel, bookDetailScreenViewModel, appBook = appBook)
 
         AppText(modifier = Modifier.constrainAs(title) {
             top.linkTo(bookImage.bottom, margin = 0.dp)
@@ -145,7 +157,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
             end.linkTo(parent.end, margin = 0.dp)
             bottom.linkTo(author.top, margin = 0.dp)
         }, label = stringResource(id = R.string.book_detail_screen_app_book_title),
-            text = mainSharedViewModel.selectedAppBook?.title)
+            text = appBook?.title)
 
         AppText(modifier = Modifier
             .constrainAs(author) {
@@ -155,7 +167,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
                 bottom.linkTo(rank.top, margin = 0.dp)
             },
             label = stringResource(id = R.string.book_detail_screen_app_book_author),
-            text = mainSharedViewModel.selectedAppBook?.author)
+            text = appBook?.author)
 
         AppText(modifier = Modifier.constrainAs(rank) {
             top.linkTo(author.bottom, margin = 0.dp)
@@ -164,7 +176,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
             bottom.linkTo(publisher.top, margin = 0.dp)
         },
             label = stringResource(id = R.string.book_detail_screen_app_book_rank),
-            text = mainSharedViewModel.selectedAppBook?.rank.toString())
+            text = appBook?.rank.toString())
 
         AppText(modifier = Modifier.constrainAs(publisher) {
             top.linkTo(rank.bottom, margin = 0.dp)
@@ -173,7 +185,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
             bottom.linkTo(description.top, margin = 0.dp)
         },
         label = stringResource(id = R.string.book_detail_screen_app_book_publisher),
-        text = mainSharedViewModel.selectedAppBook?.publisher)
+        text = appBook?.publisher)
 
         AppText(modifier = Modifier.constrainAs(description) {
                 top.linkTo(publisher.bottom, margin = 0.dp)
@@ -182,7 +194,7 @@ fun MainContent(mainSharedViewModel: MainSharedViewModel, bookDetailScreenViewMo
                 bottom.linkTo(parent.bottom, margin = 20.dp)
             },
             label = stringResource(id = R.string.book_detail_screen_app_book_description),
-            text = mainSharedViewModel.selectedAppBook?.description)
+            text = appBook?.description)
 
     }
 
@@ -213,10 +225,11 @@ private fun AppText(modifier : Modifier,
 }
 
 @Composable
-private fun FavouriteImage(modifier: Modifier,
+private fun FavouriteImage(
+    modifier: Modifier,
     favoriteBookLabel: MutableState<FavoriteBookLabel>,
     bookDetailScreenViewModel: BookDetailScreenViewModel,
-    mainSharedViewModel: MainSharedViewModel
+    appBook: AppBook
 ) {
     var favouriteImagePainter: Painter? = null
     if (favoriteBookLabel.value.favorite) {
@@ -232,7 +245,7 @@ private fun FavouriteImage(modifier: Modifier,
                 bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
                     var temporaryFavoriteBookLabel =
-                        mainSharedViewModel.selectedAppBook?.primaryIsbn13?.let {
+                        appBook?.primaryIsbn13?.let {
                             FavoriteBookLabel(
                                 it,
                                 !favoriteBookLabel.value.favorite

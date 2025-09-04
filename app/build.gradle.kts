@@ -6,6 +6,9 @@ plugins {
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
 
+    // Kotlin serialization plugin for type safe routes and navigation arguments
+    kotlin("plugin.serialization") version "1.5.0"
+
 }
 
 android {
@@ -91,6 +94,8 @@ dependencies {
 
     //Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    // JSON serialization library, works with the Kotlin serialization plugin
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
     //Hilt
     implementation("com.google.dagger:hilt-android:2.44")

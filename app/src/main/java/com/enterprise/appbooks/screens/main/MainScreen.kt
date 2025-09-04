@@ -46,7 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
-import com.enterprise.appbooks.navigation.BooksScreens
+import com.enterprise.appbooks.model.screens.BookListScreenData
 import com.enterprise.appbooks.ui.theme.AppPrimaryColor
 import com.enterprise.appbooks.ui.theme.ProgressBarEndColor
 import com.enterprise.appbooks.ui.theme.ProgressBarStartColor
@@ -229,7 +229,7 @@ fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navCon
 
         Button(
             enabled = isMainScreenButtonsEnabled.value,
-            onClick = { navController.navigate(BooksScreens.BookListScreen.name) },
+            onClick = { navController.navigate(BookListScreenData) },
             colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
         ) {
             Text(text = stringResource(R.string.main_screen_list_books_button))

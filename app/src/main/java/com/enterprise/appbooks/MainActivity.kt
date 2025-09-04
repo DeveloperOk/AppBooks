@@ -13,18 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import com.enterprise.appbooks.navigation.BooksNavigation
 import com.enterprise.appbooks.ui.theme.AppBooksTheme
-import com.enterprise.appbooks.viewmodel.MainSharedViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    lateinit var mainSharedViewModel: MainSharedViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        mainSharedViewModel = ViewModelProvider(this)[MainSharedViewModel::class.java]
 
         val activityFinisher : () -> Unit = {
             this.finish()
@@ -38,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()) {
                     Column(verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        BooksNavigation(mainSharedViewModel, activityFinisher)
+                        BooksNavigation(activityFinisher)
 
                     }
 

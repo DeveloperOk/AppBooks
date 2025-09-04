@@ -30,7 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.enterprise.appbooks.R
-import com.enterprise.appbooks.navigation.BooksScreens
+import com.enterprise.appbooks.model.screens.MainScreenData
 import com.enterprise.appbooks.ui.theme.AppPrimaryColor
 import kotlinx.coroutines.delay
 
@@ -52,7 +52,7 @@ fun SplashScreen(navController: NavController) {
         )
 
         delay(2000L)
-        navController.navigate(BooksScreens.MainScreen.name)
+        navController.navigate(MainScreenData)
     } )
 
 

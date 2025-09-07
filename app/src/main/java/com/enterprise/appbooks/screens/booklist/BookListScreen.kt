@@ -43,6 +43,7 @@ import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.SmallImage
 import com.enterprise.appbooks.model.screens.BookDetailScreenData
+import com.enterprise.appbooks.navigation.BooksNavigationScreens
 import com.enterprise.appbooks.ui.theme.ListBookScreenRowBorder
 import com.enterprise.appbooks.viewmodel.booklist.BookListScreenViewModel
 import com.google.gson.Gson
@@ -104,7 +105,7 @@ fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreen
             .clickable {
                 val gson = Gson()
                 val appBookSerialized = gson.toJson(appBook)
-                navController.navigate(BookDetailScreenData(appBookSerialized = appBookSerialized))
+                navController.navigate(BooksNavigationScreens.BookDetailScreenRoute(appBookSerialized = appBookSerialized))
             },
         shape = RoundedCornerShape(15.dp),
         color = Color.White,

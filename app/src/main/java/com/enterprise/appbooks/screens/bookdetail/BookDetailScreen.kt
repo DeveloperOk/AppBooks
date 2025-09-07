@@ -51,11 +51,7 @@ fun BookDetailScreen(
     bookDetailScreenData: BookDetailScreenData
 ){
 
-    val appBook = remember {
-        val gson = Gson()
-        val appBook = gson.fromJson(bookDetailScreenData.appBookSerialized, AppBook::class.java)
-        appBook
-    }
+    val appBook = bookDetailScreenData.appBook
 
     LazyRow(modifier = Modifier
         .fillMaxSize().background(color = Color.White)){

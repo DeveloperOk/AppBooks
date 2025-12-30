@@ -27,31 +27,25 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.SmallImage
-import com.enterprise.appbooks.model.screens.BookDetailScreenData
-import com.enterprise.appbooks.navigation.BooksNavigationScreens
 import com.enterprise.appbooks.ui.theme.ListBookScreenRowBorder
 import com.enterprise.appbooks.viewmodel.booklist.BookListScreenViewModel
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookListScreen(navController: NavController,
+fun BookListScreen(navigateToBookDetailScreen: (AppBook) -> Unit,
                    bookListScreenViewModel:BookListScreenViewModel = hiltViewModel<BookListScreenViewModel>()){
 
     LaunchedEffect(key1 = true, block = {
@@ -80,7 +74,7 @@ fun BookListScreen(navController: NavController,
 
                     items(allAppBooks.value) { appBook ->
 
-                        LazyColumnRow(navController, appBook, bookListScreenViewModel)
+                        LazyColumnRow(navigateToBookDetailScreen = navigateToBookDetailScreen, appBook, bookListScreenViewModel)
 
                     }
 
@@ -95,7 +89,7 @@ fun BookListScreen(navController: NavController,
 }
 
 @Composable
-fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
+fun LazyColumnRow(navigateToBookDetailScreen: (AppBook) -> Unit, appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
 
     Surface(shadowElevation = 10.dp,
         modifier = Modifier
@@ -103,9 +97,7 @@ fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreen
             .width(350.dp)
             .height(240.dp)
             .clickable {
-                val gson = Gson()
-                val appBookSerialized = gson.toJson(appBook)
-                navController.navigate(BooksNavigationScreens.BookDetailScreenRoute(appBookSerialized = appBookSerialized))
+                navigateToBookDetailScreen(appBook)
             },
         shape = RoundedCornerShape(15.dp),
         color = Color.White,
@@ -113,13 +105,13 @@ fun LazyColumnRow(navController: NavController, appBook: AppBook, bookListScreen
             width = 2.dp, color = ListBookScreenRowBorder
         )
     ) {
-        LazyColumnRowBody(navController, appBook, bookListScreenViewModel)
+        LazyColumnRowBody(appBook, bookListScreenViewModel)
     }
 
 }
 
 @Composable
-fun LazyColumnRowBody(navController: NavController, appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
+fun LazyColumnRowBody(appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
 
     val smallImage = remember { mutableStateOf(SmallImage()) }
     val favoriteBookLabel = remember { mutableStateOf(FavoriteBookLabel()) }

@@ -2,10 +2,11 @@ package com.enterprise.appbooks.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.screens.BookDetailScreenData
 import com.enterprise.appbooks.screens.bookdetail.BookDetailScreen
@@ -14,44 +15,65 @@ import com.enterprise.appbooks.screens.main.MainScreen
 import com.enterprise.appbooks.screens.splash.SplashScreen
 import com.google.gson.Gson
 
+
+
 @Composable
-fun BooksNavigation(activityFinisher: () -> Unit) {
+fun BooksNavigation(activityFinisher: () -> Unit){
 
-    val navController = rememberNavController()
+    //With rememberNavBackStack, backstack survives the configuration changes such as screen rotation etc.
+    val backStack = rememberNavBackStack(
+        //NavigationStartScreen
+        BooksNavigationScreens.SplashScreenRoute
+    )
 
-    NavHost(navController = navController,
-        startDestination = BooksNavigationScreens.SplashScreenRoute
-    ) {
+    NavDisplay(
+        backStack = backStack,
 
-        composable<BooksNavigationScreens.SplashScreenRoute>{
-            SplashScreen(navController = navController)
-        }
+        onBack = { backStack.removeLastOrNull() },
 
-      composable<BooksNavigationScreens.MainScreenRoute>{
-          MainScreen(navController = navController, activityFinisher = activityFinisher)
-      }
+        //In order to clear viewmodel, on navigation back
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
 
-      composable<BooksNavigationScreens.BookListScreenRoute>{
-          BookListScreen(navController = navController)
-      }
+        entryProvider = entryProvider {
 
-      composable<BooksNavigationScreens.BookDetailScreenRoute>{backStackEntry ->
-
-            val bookDetailScreenRoute: BooksNavigationScreens.BookDetailScreenRoute = backStackEntry.toRoute()
-
-            val appBook: AppBook = remember {
-              val gson = Gson()
-              val appBook = gson.fromJson(bookDetailScreenRoute.appBookSerialized, AppBook::class.java)
-              appBook
+            entry<BooksNavigationScreens.SplashScreenRoute> {
+                SplashScreen(navigateToMainScreen =
+                    { backStack.add(BooksNavigationScreens.MainScreenRoute)}
+                )
             }
 
-            val bookDetailScreenData: BookDetailScreenData = BookDetailScreenData(appBook = appBook)
+            entry<BooksNavigationScreens.MainScreenRoute> {
+                MainScreen(navigateToBookListScreen =
+                    { backStack.add(BooksNavigationScreens.BookListScreenRoute)},
+                    activityFinisher = activityFinisher)
+            }
 
-            BookDetailScreen(
-                navController = navController,
-                bookDetailScreenData = bookDetailScreenData)
-      }
+            entry<BooksNavigationScreens.BookListScreenRoute> {
+                BookListScreen(navigateToBookDetailScreen = { appBook ->
+                    val gson = Gson()
+                    val appBookSerialized = gson.toJson(appBook)
+                    backStack.add(BooksNavigationScreens.BookDetailScreenRoute(appBookSerialized = appBookSerialized))
+                })
+            }
 
-    }
 
+            entry<BooksNavigationScreens.BookDetailScreenRoute> { bookDetailScreenRoute ->
+
+                val appBook: AppBook = remember {
+                    val gson = Gson()
+                    val appBook = gson.fromJson(bookDetailScreenRoute.appBookSerialized, AppBook::class.java)
+                    appBook
+                }
+
+                val bookDetailScreenData: BookDetailScreenData = BookDetailScreenData(appBook = appBook)
+
+                BookDetailScreen(bookDetailScreenData = bookDetailScreenData)
+
+            }
+
+        }
+    )
 }

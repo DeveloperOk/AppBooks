@@ -1,24 +1,25 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 
     //Hilt
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
 
-    // Kotlin serialization plugin for type safe routes and navigation arguments
-    kotlin("plugin.serialization") version "1.5.0"
+    //Navigation3
+    kotlin("plugin.serialization") version "2.2.21"
 
 }
 
 android {
     namespace = "com.enterprise.appbooks"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.enterprise.appbooks"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -92,14 +93,19 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
 
 
-    //Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+    //Navigation3
+    val navigation3Version = "1.0.0"
+    implementation("androidx.navigation3:navigation3-runtime:$navigation3Version")
+    implementation("androidx.navigation3:navigation3-ui:$navigation3Version")
     // JSON serialization library, works with the Kotlin serialization plugin
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    //Navigation3 ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-navigation3:2.10.0")
 
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:2.57.2")
+    kapt("com.google.dagger:hilt-android-compiler:2.57.2")
 
     //HiltViewModel
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")

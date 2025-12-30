@@ -12,6 +12,15 @@ import javax.inject.Inject
 class BookDetailScreenViewModel @Inject constructor(private val appRepository: AppRepository)
     : ViewModel(){
 
+    init {
+        println("BookDetailScreenViewModel initialized")
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        println("BookDetailScreenViewModel cleared")
+    }
+
     fun getFavoriteBookLabel(primaryIsbn13: String): FavoriteBookLabel? {
         return appRepository.getFavoriteBookLabel(primaryIsbn13)
     }

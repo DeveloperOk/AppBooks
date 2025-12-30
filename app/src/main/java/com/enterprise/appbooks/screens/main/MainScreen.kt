@@ -29,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,19 +43,18 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.enterprise.appbooks.R
-import com.enterprise.appbooks.navigation.BooksNavigationScreens
 import com.enterprise.appbooks.ui.theme.AppPrimaryColor
 import com.enterprise.appbooks.ui.theme.ProgressBarEndColor
 import com.enterprise.appbooks.ui.theme.ProgressBarStartColor
 import com.enterprise.appbooks.viewmodel.main.MainScreenViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.Unit
 
 
 @Composable
-fun MainScreen(navController: NavController, activityFinisher : () -> Unit,
+fun MainScreen(navigateToBookListScreen: () -> Unit, activityFinisher : () -> Unit,
                mainScreenViewModel: MainScreenViewModel = hiltViewModel<MainScreenViewModel>()
 ){
 
@@ -64,14 +62,14 @@ fun MainScreen(navController: NavController, activityFinisher : () -> Unit,
         activityFinisher()
     }
 
-    BodyContent(navController, mainScreenViewModel)
+    BodyContent(navigateToBookListScreen = navigateToBookListScreen, mainScreenViewModel)
 
 }
 
 
 @Composable
 fun BodyContent(
-    navController: NavController,
+    navigateToBookListScreen: () -> Unit,
     mainScreenViewModel: MainScreenViewModel
 ) {
 
@@ -109,7 +107,7 @@ fun BodyContent(
             bottom.linkTo(parent.bottom, margin = 10.dp)
             start.linkTo(parent.start, margin = 10.dp)
             end.linkTo(parent.end, margin = 10.dp)
-        }, mainScreenViewModel = mainScreenViewModel, navController = navController)
+        }, mainScreenViewModel = mainScreenViewModel, navigateToBookListScreen = navigateToBookListScreen)
 
     }
 
@@ -199,7 +197,7 @@ fun AppProgressIndicator(inputProgressBarFactor: MutableStateFlow<Float>, inputP
 }
 
 @Composable
-fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navController: NavController) {
+fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navigateToBookListScreen: () -> Unit,) {
     val context = LocalContext.current
 
     val isMainScreenButtonsEnabled = mainScreenViewModel.isMainScreenButtonsEnabled.collectAsStateWithLifecycle()
@@ -229,7 +227,7 @@ fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, navCon
 
         Button(
             enabled = isMainScreenButtonsEnabled.value,
-            onClick = { navController.navigate(BooksNavigationScreens.BookListScreenRoute) },
+            onClick = { navigateToBookListScreen() },
             colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)
         ) {
             Text(text = stringResource(R.string.main_screen_list_books_button))

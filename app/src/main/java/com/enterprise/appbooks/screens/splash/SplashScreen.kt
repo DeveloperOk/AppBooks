@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -24,18 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.navigation.BooksNavigationScreens
 import com.enterprise.appbooks.ui.theme.AppPrimaryColor
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen(navigateToMainScreen: () -> Unit) {
 
     val scale = remember {
         Animatable(0f)
@@ -52,7 +49,7 @@ fun SplashScreen(navController: NavController) {
         )
 
         delay(2000L)
-        navController.navigate(BooksNavigationScreens.MainScreenRoute)
+        navigateToMainScreen()
     } )
 
 

@@ -33,20 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.model.AppBook
 import com.enterprise.appbooks.model.BigImage
 import com.enterprise.appbooks.model.FavoriteBookLabel
 import com.enterprise.appbooks.model.screens.BookDetailScreenData
 import com.enterprise.appbooks.viewmodel.bookdetail.BookDetailScreenViewModel
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun BookDetailScreen(
-    navController: NavController,
     bookDetailScreenViewModel: BookDetailScreenViewModel = hiltViewModel<BookDetailScreenViewModel>(),
     bookDetailScreenData: BookDetailScreenData
 ){

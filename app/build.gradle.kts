@@ -46,11 +46,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    //Hilt
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
     }
@@ -63,6 +58,15 @@ android {
         }
     }
 }
+
+
+//Hilt
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 
 //Hilt
 kapt {

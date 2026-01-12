@@ -3,8 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 
+    //KSP for Hilt and Room
+    id("com.google.devtools.ksp")
+
     //Hilt
-    kotlin("kapt")
     id("com.google.dagger.hilt.android")
 
     //Navigation3
@@ -68,12 +70,6 @@ kotlin {
 }
 
 
-//Hilt
-kapt {
-    correctErrorTypes = true
-}
-
-
 dependencies {
 
     //Compose Constraint Layout
@@ -94,7 +90,7 @@ dependencies {
     //Room components
     val room_version = "2.4.2"
     implementation("androidx.room:room-runtime:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 
 
     //Navigation3
@@ -109,7 +105,7 @@ dependencies {
 
     //Hilt
     implementation("com.google.dagger:hilt-android:2.57.2")
-    kapt("com.google.dagger:hilt-android-compiler:2.57.2")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.2")
 
     //HiltViewModel
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")

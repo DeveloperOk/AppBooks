@@ -10,9 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModelProvider
-import com.enterprise.appbooks.navigation.BooksNavigation
-import com.enterprise.appbooks.ui.theme.AppBooksTheme
+import com.enterprise.appbooks.presentation.navigation.BooksNavigation
+import com.enterprise.appbooks.presentation.ui.theme.AppBooksTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

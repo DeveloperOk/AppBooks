@@ -10,11 +10,10 @@ import com.enterprise.appbooks.R
 import com.enterprise.appbooks.domain.constants.nytimes.ImageConstants
 import com.enterprise.appbooks.data.remotedatasource.retrofit.exception.NoInternetConnectionException
 import com.enterprise.appbooks.domain.model.AppBook
-import com.enterprise.appbooks.domain.model.BigImage
 import com.enterprise.appbooks.domain.model.Book
 import com.enterprise.appbooks.domain.model.FavoriteBookLabel
-import com.enterprise.appbooks.domain.model.SmallImage
 import com.enterprise.appbooks.data.repository.AppRepository
+import com.enterprise.appbooks.presentation.utils.ImageFileUtil
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -130,13 +129,9 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                     if (book.primaryIsbn13 != null) {
 
                         var appBook = AppBook()
-                        var smallImage = SmallImage()
-                        var bigImage = BigImage()
                         var favoriteBookLabel = FavoriteBookLabel()
 
                         appBook.primaryIsbn13 = book.primaryIsbn13!!
-                        smallImage.primaryIsbn13 = book.primaryIsbn13!!
-                        bigImage.primaryIsbn13 = book.primaryIsbn13!!
                         favoriteBookLabel.primaryIsbn13 = book.primaryIsbn13!!
 
                         appBook.bookImage = book.bookImage
@@ -148,23 +143,19 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                         appBook.description = book.description
                         appBook.publisher = book.publisher
 
+
+                        val imageBitmap: Bitmap = Picasso.get().load(appBook.bookImage).get()
+
+                        val imageFileName = ImageConstants.imageFileNamePrefix + appBook.primaryIsbn13 + ImageConstants.imageFileExtension
+
+                        val imageFile = ImageFileUtil.saveBitmapToInternalFolder(context = context,
+                            bitmap = imageBitmap,
+                            folderName = ImageConstants.folderNameOfImages,
+                            fileName = imageFileName)
+
+                        appBook.imageLocalPath = imageFile.absolutePath
+
                         appRepository.addAppBook(appBook)
-
-                        val bitmapBig: Bitmap =
-                            Picasso.get().load(appBook.bookImage).resize(
-                                ImageConstants.BigImageWidth, 0
-                            ).get()
-                        bigImage.bigImage = bitmapBig
-                        appRepository.addBigImage(bigImage)
-
-                        val bitmapSmall: Bitmap = Bitmap.createScaledBitmap(
-                            bitmapBig,
-                            ImageConstants.SmallImageWidth,
-                            bitmapBig.height * ImageConstants.SmallImageWidth / bitmapBig.width,
-                            false
-                        )
-                        smallImage.smallImage = bitmapSmall
-                        appRepository.addSmallImage(smallImage)
 
                         favoriteBookLabel.favorite = false
                         appRepository.insertFavoriteBookLabel(favoriteBookLabel)
@@ -215,5 +206,8 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
 
         }
     }
+
+
+
 
 }

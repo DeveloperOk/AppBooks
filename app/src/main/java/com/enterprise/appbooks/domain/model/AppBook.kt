@@ -17,6 +17,8 @@ data class AppBook (
     var author             : String?             = null,
     var rank               : Int?                = null,
     var description        : String?             = null,
-    var publisher          : String?             = null
+    var publisher          : String?             = null,
+
+    var imageLocalPath     : String?             = null
 
 )

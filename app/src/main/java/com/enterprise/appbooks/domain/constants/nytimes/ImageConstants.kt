@@ -7,6 +7,10 @@ class ImageConstants {
         val SmallImageWidth = 250
         val BigImageWidth = 500
 
+        val folderNameOfImages = "imagesfolder"
+        val imageFileNamePrefix = "image"
+        val imageFileExtension = ".png"
+
     }
 
 }

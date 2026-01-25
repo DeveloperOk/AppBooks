@@ -1,5 +1,7 @@
 package com.enterprise.appbooks.presentation.screens.booklist
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,8 +40,8 @@ import androidx.lifecycle.viewModelScope
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.domain.model.AppBook
 import com.enterprise.appbooks.domain.model.FavoriteBookLabel
-import com.enterprise.appbooks.domain.model.SmallImage
 import com.enterprise.appbooks.presentation.ui.theme.ListBookScreenRowBorder
+import com.enterprise.appbooks.presentation.utils.ImageFileUtil
 import com.enterprise.appbooks.presentation.viewmodel.booklist.BookListScreenViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -110,22 +112,25 @@ fun LazyColumnRow(navigateToBookDetailScreen: (AppBook) -> Unit, appBook: AppBoo
 
 }
 
+
+
 @Composable
 fun LazyColumnRowBody(appBook: AppBook, bookListScreenViewModel:BookListScreenViewModel){
 
-    val smallImage = remember { mutableStateOf(SmallImage()) }
     val favoriteBookLabel = remember { mutableStateOf(FavoriteBookLabel()) }
+
+    val imageBitmap = remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(key1 = true, block = {
         bookListScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
-            val tempSmallImage = bookListScreenViewModel.getSmallImage(appBook.primaryIsbn13)
+            val tempBitmap = appBook.imageLocalPath?.let { ImageFileUtil.loadBitmapFromFile(it) }
+
             val tempFavoriteBookLabel = bookListScreenViewModel.getFavoriteBookLabel(appBook.primaryIsbn13)
+
             bookListScreenViewModel.viewModelScope.launch(Dispatchers.Main) {
 
-                if (tempSmallImage != null) {
-                    smallImage.value = tempSmallImage
-                }
+                imageBitmap.value = tempBitmap
 
                 tempFavoriteBookLabel?.let{
                     favoriteBookLabel.value = it
@@ -136,7 +141,7 @@ fun LazyColumnRowBody(appBook: AppBook, bookListScreenViewModel:BookListScreenVi
         }
     })
 
-    smallImage.value.smallImage?.asImageBitmap()?.let {
+    imageBitmap.value?.asImageBitmap()?.let {
 
         ConstraintLayout(modifier = Modifier
             .fillMaxSize()

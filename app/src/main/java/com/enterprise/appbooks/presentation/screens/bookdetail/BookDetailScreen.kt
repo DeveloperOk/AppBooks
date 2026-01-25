@@ -1,5 +1,6 @@
 package com.enterprise.appbooks.presentation.screens.bookdetail
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,9 +36,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import com.enterprise.appbooks.R
 import com.enterprise.appbooks.domain.model.AppBook
-import com.enterprise.appbooks.domain.model.BigImage
 import com.enterprise.appbooks.domain.model.FavoriteBookLabel
 import com.enterprise.appbooks.domain.model.screens.BookDetailScreenData
+import com.enterprise.appbooks.presentation.utils.ImageFileUtil
 import com.enterprise.appbooks.presentation.viewmodel.bookdetail.BookDetailScreenViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -80,19 +81,18 @@ fun MainContent(
     appBook: AppBook
 ){
 
-    val bigImage = remember { mutableStateOf(BigImage()) }
+
     val favoriteBookLabel = remember { mutableStateOf(FavoriteBookLabel()) }
 
+    val imageBitmap = remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(key1 = true, block = {
 
         bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.IO) {
 
-            val tempBigImage = appBook?.primaryIsbn13?.let {
-                bookDetailScreenViewModel.getBigImage(
-                    it
-                )
-            }
+
+            val tempBitmap = appBook.imageLocalPath?.let { ImageFileUtil.loadBitmapFromFile(it) }
+
             val tempFavoriteBookLabel = appBook?.primaryIsbn13?.let {
                 bookDetailScreenViewModel.getFavoriteBookLabel(
                     it
@@ -100,9 +100,7 @@ fun MainContent(
             }
             bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.Main) {
 
-                if (tempBigImage != null) {
-                    bigImage.value = tempBigImage
-                }
+                imageBitmap.value = tempBitmap
 
                 tempFavoriteBookLabel?.let{
                     favoriteBookLabel.value = it
@@ -136,7 +134,7 @@ fun MainContent(
             end.linkTo(parent.end, margin = 0.dp)
             bottom.linkTo(title.top, margin = 0.dp)
         },
-            bigImage = bigImage)
+            imageBitmap = imageBitmap)
 
         FavouriteImage(modifier = Modifier.constrainAs(favoriteImage) {
             top.linkTo(parent.top, margin = 0.dp)
@@ -271,9 +269,12 @@ private fun FavouriteImage(
 }
 
 @Composable
-fun BookImage(modifier: Modifier, bigImage: MutableState<BigImage>) {
+fun BookImage(
+    modifier: Modifier,
+    imageBitmap: MutableState<Bitmap?>
+) {
 
-    bigImage.value.bigImage?.asImageBitmap()?.let {
+    imageBitmap.value?.asImageBitmap()?.let {
         Image(
             modifier = modifier
                 .width(300.dp)

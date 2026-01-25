@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.enterprise.appbooks.domain.model.AppBook
 import com.enterprise.appbooks.domain.model.FavoriteBookLabel
-import com.enterprise.appbooks.domain.model.SmallImage
 import com.enterprise.appbooks.data.repository.AppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -37,12 +36,6 @@ class BookListScreenViewModel @Inject constructor(private val appRepository: App
 
     fun getFavoriteBookLabel(primaryIsbn13: String): FavoriteBookLabel? {
         return appRepository.getFavoriteBookLabel(primaryIsbn13)
-    }
-
-    fun getSmallImage(primaryIsbn13: String): SmallImage?{
-
-        return appRepository.getSmallImage(primaryIsbn13)
-
     }
 
 }

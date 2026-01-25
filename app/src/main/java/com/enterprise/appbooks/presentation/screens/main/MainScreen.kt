@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -274,15 +272,15 @@ fun NoInternetConnectionDialog(isDialogVisible: MutableStateFlow<Boolean>) {
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()){
 
-                Icon(imageVector = Icons.Default.Info,
+                Icon(painter = painterResource(R.drawable.baseline_info_24),
                     contentDescription
                     = stringResource(id = R.string.no_internet_connection_popup_icon_content_description),
                     tint = Color.Blue)
 
                 Spacer(modifier = Modifier.width(5.dp))
 
-                Text(text = stringResource(id = R.string.no_internet_connection_popup_title))
 
+                Text(text = stringResource(id = R.string.no_internet_connection_popup_title))
 
             }
 

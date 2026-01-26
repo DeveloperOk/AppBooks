@@ -75,8 +75,9 @@ dependencies {
     //Compose Constraint Layout
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
-    //Picasso
-    implementation("com.squareup.picasso:picasso:2.71828")
+    //Coil Image library
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:3.0.0")

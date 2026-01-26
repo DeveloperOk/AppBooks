@@ -9,10 +9,8 @@ import com.enterprise.appbooks.domain.constants.nytimes.ImageConstants
 import com.enterprise.appbooks.data.remotedatasource.retrofit.exception.NoInternetConnectionException
 import com.enterprise.appbooks.domain.model.AppBook
 import com.enterprise.appbooks.domain.model.Book
-import com.enterprise.appbooks.domain.model.FavoriteBookLabel
 import com.enterprise.appbooks.data.repository.AppRepository
 import com.enterprise.appbooks.presentation.utils.ImageFileUtil
-import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -151,19 +149,22 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                         appBook.publisher = book.publisher
 
 
-                        val imageBitmap: Bitmap = Picasso.get().load(appBook.bookImage).get()
+                        val imageBitmap: Bitmap? = appBook.bookImage?.let { ImageFileUtil.getBitmapFromUrl(context = context, url = it) }
 
-                        val imageFileName = ImageConstants.imageFileNamePrefix + appBook.primaryIsbn13 + ImageConstants.imageFileExtension
+                        imageBitmap?.let{ nonNullImageBitmap ->
 
-                        val imageFile = ImageFileUtil.saveBitmapToInternalFolder(context = context,
-                            bitmap = imageBitmap,
-                            folderName = ImageConstants.folderNameOfImages,
-                            fileName = imageFileName)
+                            val imageFileName = ImageConstants.imageFileNamePrefix + appBook.primaryIsbn13 + ImageConstants.imageFileExtension
 
-                        appBook.imageLocalPath = imageFile.absolutePath
+                            val imageFile = ImageFileUtil.saveBitmapToInternalFolder(context = context,
+                                bitmap = nonNullImageBitmap,
+                                folderName = ImageConstants.folderNameOfImages,
+                                fileName = imageFileName)
 
-                        appRepository.addAppBook(appBook)
+                            appBook.imageLocalPath = imageFile.absolutePath
 
+                            appRepository.addAppBook(appBook)
+
+                        }
 
                         mutex.withLock {
                             index++

@@ -3,6 +3,11 @@ package com.enterprise.appbooks.presentation.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import coil3.ImageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
 import java.io.File
 import java.io.FileOutputStream
 
@@ -42,6 +47,34 @@ class ImageFileUtil {
             }
 
             return imageFile
+        }
+
+
+        suspend fun getBitmapFromUrl(context: Context, url: String): Bitmap? {
+
+            return try {
+
+                val imageLoader = ImageLoader(context)
+
+                val request = ImageRequest.Builder(context)
+                    .data(url)
+                    .allowHardware(false)
+                    .build()
+
+                when (val result = imageLoader.execute(request)) {
+                    is SuccessResult -> {
+                        result.image.toBitmap()
+                    }
+                    else -> null
+                }
+
+            }catch(e: Exception) {
+
+                e.printStackTrace()
+
+                null
+            }
+
         }
 
     }

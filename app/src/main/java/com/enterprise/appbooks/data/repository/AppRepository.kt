@@ -41,4 +41,10 @@ class AppRepository @Inject constructor(private val localDataSourceBookDatabase:
 
     }
 
+    fun deleteFavoriteBookLabel(favoriteBookLabel: FavoriteBookLabel) {
+
+        localDataSourceBookDatabase.getFavoriteBookLabelDao().deleteFavoriteBookLabel(favoriteBookLabel)
+
+    }
+
 }

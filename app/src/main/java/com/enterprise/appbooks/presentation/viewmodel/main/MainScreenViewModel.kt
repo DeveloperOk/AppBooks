@@ -138,10 +138,8 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                     if (book.primaryIsbn13 != null) {
 
                         var appBook = AppBook()
-                        var favoriteBookLabel = FavoriteBookLabel()
 
                         appBook.primaryIsbn13 = book.primaryIsbn13!!
-                        favoriteBookLabel.primaryIsbn13 = book.primaryIsbn13!!
 
                         appBook.bookImage = book.bookImage
                         appBook.bookImageWidth = book.bookImageWidth
@@ -166,8 +164,6 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
 
                         appRepository.addAppBook(appBook)
 
-                        favoriteBookLabel.favorite = false
-                        appRepository.insertFavoriteBookLabel(favoriteBookLabel)
 
                         mutex.withLock {
                             index++

@@ -244,9 +244,16 @@ private fun FavouriteImage(
                         }
 
                     temporaryFavoriteBookLabel?.let {
-                        bookDetailScreenViewModel.addFavoriteBookLabel(
-                            it
-                        )
+
+                        if(it.favorite){
+                            bookDetailScreenViewModel.addFavoriteBookLabel(
+                                it
+                            )
+                        }else{
+                            bookDetailScreenViewModel.deleteFavoriteBookLabel(it)
+                        }
+
+
                     }
 
                     bookDetailScreenViewModel.viewModelScope.launch(Dispatchers.Main) {

@@ -30,4 +30,10 @@ class BookDetailScreenViewModel @Inject constructor(private val appRepository: A
 
     }
 
+    fun deleteFavoriteBookLabel(favoriteBookLabel: FavoriteBookLabel) {
+
+        appRepository.deleteFavoriteBookLabel(favoriteBookLabel)
+
+    }
+
 }

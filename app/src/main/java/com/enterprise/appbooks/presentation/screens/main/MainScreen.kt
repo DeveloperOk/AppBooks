@@ -1,5 +1,6 @@
 package com.enterprise.appbooks.presentation.screens.main
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -215,7 +216,19 @@ fun MainBody(modifier: Modifier, mainScreenViewModel:MainScreenViewModel, naviga
             enabled = isMainScreenButtonsEnabled.value,
             onClick = {
 
-                mainScreenViewModel.getBooks(context)
+                mainScreenViewModel.getBooks(context = context,
+                    showToastWithMessageTextId = { messageTextId ->
+
+                        Toast.makeText(
+                            context,
+                            messageTextId,
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                    },
+                    retrofitErrorMessageId =R.string.retrofit_error_message,
+                    mainScreenNoBooksMessageId = R.string.main_screen_no_books_message,
+                    mainActivityBooksDownloadedMessageId = R.string.main_activity_books_downloaded_message)
 
             },
             colors = ButtonDefaults.buttonColors(containerColor = AppPrimaryColor)

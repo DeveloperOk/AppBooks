@@ -3,10 +3,8 @@ package com.enterprise.appbooks.presentation.viewmodel.main
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.enterprise.appbooks.R
 import com.enterprise.appbooks.domain.constants.nytimes.ImageConstants
 import com.enterprise.appbooks.data.remotedatasource.retrofit.exception.NoInternetConnectionException
 import com.enterprise.appbooks.domain.model.AppBook
@@ -40,7 +38,13 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
 
     val isNoInternetConnectionDialogVisible = MutableStateFlow(false)
 
-    fun getBooks(context: Context) {
+    fun getBooks(
+        context: Context,
+        showToastWithMessageTextId: (Int) -> Unit,
+        retrofitErrorMessageId: Int,
+        mainScreenNoBooksMessageId: Int,
+        mainActivityBooksDownloadedMessageId: Int
+    ) {
 
         viewModelScope.launch(Dispatchers.Main) {
 
@@ -60,12 +64,12 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                         val booksData = booksDataResponse.body()
 
                         val books = booksData?.results?.books
-                        addBooksToDatabase(books, context)
+                        addBooksToDatabase(books, context, showToastWithMessageTextId, mainScreenNoBooksMessageId, mainActivityBooksDownloadedMessageId)
 
                     } else {
 
                         val failureMessageToLog = "Response Error!"
-                        handleError(failureMessageToLog, context, false)
+                        handleError(failureMessageToLog, context, false, showToastWithMessageTextId, retrofitErrorMessageId)
 
                     }
 
@@ -74,9 +78,9 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
                     val failureMessageToLog = exception.message.toString()
 
                     if (exception is NoInternetConnectionException) {
-                        handleError(failureMessageToLog, context, true)
+                        handleError(failureMessageToLog, context, true, showToastWithMessageTextId, retrofitErrorMessageId)
                     } else {
-                        handleError(failureMessageToLog, context, false)
+                        handleError(failureMessageToLog, context, false, showToastWithMessageTextId, retrofitErrorMessageId)
                     }
 
                 }
@@ -85,18 +89,20 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
         }
     }
 
-    private fun handleError(failureMessageToLog: String, context: Context, showNoInternetConnectionPopup: Boolean) {
+    private fun handleError(
+        failureMessageToLog: String,
+        context: Context,
+        showNoInternetConnectionPopup: Boolean,
+        showToastWithMessageTextId: (Int) -> Unit,
+        retrofitErrorMessageId: Int,
+    ) {
 
         Log.d(TAG, onFailureText + failureMessageToLog)
 
         viewModelScope.launch(Dispatchers.Main) {
 
             if(!showNoInternetConnectionPopup){
-                Toast.makeText(
-                    context,
-                    R.string.retrofit_error_message,
-                    Toast.LENGTH_LONG
-                ).show()
+                showToastWithMessageTextId(retrofitErrorMessageId)
             }
 
             mainScreenShowProgressIndicator.update{ currentValue -> false }
@@ -110,11 +116,14 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
 
     private fun addBooksToDatabase(
         books: ArrayList<Book>?,
-        context: Context
+        context: Context,
+        showToastWithMessageTextId: (Int) -> Unit,
+        mainScreenNoBooksMessageId: Int,
+        mainActivityBooksDownloadedMessageId: Int
     ) {
         if (books.isNullOrEmpty()) {
 
-            handleEndOfProcess(R.string.main_screen_no_books_message, context)
+            handleEndOfProcess(mainScreenNoBooksMessageId, context, showToastWithMessageTextId)
 
         } else {
 
@@ -176,7 +185,11 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
 
                             if (index == sizeOfbooks) {
 
-                                handleEndOfProcess(R.string.main_activity_books_downloaded_message, context)
+                                handleEndOfProcess(
+                                    mainActivityBooksDownloadedMessageId,
+                                    context,
+                                    showToastWithMessageTextId
+                                )
 
                             }
 
@@ -189,17 +202,17 @@ class MainScreenViewModel @Inject constructor(private val appRepository: AppRepo
         }
     }
 
-    private fun handleEndOfProcess(messageTextId: Int, context: Context) {
+    private fun handleEndOfProcess(
+        messageTextId: Int,
+        context: Context,
+        showToastWithMessageTextId: (Int) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.Main) {
 
             mainScreenProgressBarFactor.update{ currentValue -> 1.0f }
             mainScreenProgressBarPercent.update{ currentValue -> 100 }
 
-            Toast.makeText(
-                context,
-                messageTextId,
-                Toast.LENGTH_LONG
-            ).show()
+            showToastWithMessageTextId(messageTextId)
 
             mainScreenShowProgressIndicator.update{ currentValue -> false }
             isMainScreenButtonsEnabled.update{ currentValue -> true }

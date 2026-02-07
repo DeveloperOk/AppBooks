@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -44,7 +45,7 @@ fun AppBooksApp(activityFinisher: () -> Unit) {
     AppBooksTheme {
 
         Surface(color = AppPrimaryColor,
-            modifier = Modifier.fillMaxSize()) {
+            modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
             Column(verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.systemBarsPadding().fillMaxSize().background(AppWhite)) {

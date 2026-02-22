@@ -1,6 +1,5 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 
     //KSP for Hilt and Room
@@ -105,8 +104,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-navigation3:2.10.0")
 
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.57.2")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.2")
+    implementation("com.google.dagger:hilt-android:2.59.2")
+    ksp("com.google.dagger:hilt-android-compiler:2.59.2")
 
     //HiltViewModel
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
